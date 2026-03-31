@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ULTRA PREMIUM | Cinematic Interface</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-base: #020005;
+            --neon-blue: #00f3ff;
+            --neon-purple: #bc13fe;
+            --glass-bg: rgba(20, 20, 25, 0.15);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --text-main: #ffffff;
+            --text-muted: #8b8b9f;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            overscroll-behavior: none;
+        }
+
+        /* 3. SHADER/FLUID BACKGROUND (CSS Implementation for Performance) */
+        .fluid-bg {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: linear-gradient(45deg, #020005, #0a001a, #001122, #020005);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            z-index: -2;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Film Grain for Cinematic Depth */
+        .noise-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            opacity: 0.04;
+            pointer-events: none;
+            z-index: 9997;
+        }
+
+        /* WebGL Canvas */
+        #webgl-canvas {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* Typography */
+        h1, h2, h3 { font-family: 'Space Grotesk', sans-serif; }
+
+        .gradient-text {
+            background: linear-gradient(to right, var(--neon-blue), var(--neon-purple), var(--neon-blue));
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shine 4s linear infinite;
+        }
+
+        @keyframes shine {
+            to { background-position: 200% center; }
+        }
+
+        /* 6. MICRO INTERACTIONS: Custom Cursor */
+        #cursor-glow {
+            position: fixed;
+            width: 40px; height: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            z-index: 9999;
+            transition: width 0.3s, height 0.3s, background 0.3s, border-color 0.3s;
+            display: flex; justify-content: center; align-items: center;
+            backdrop-filter: blur(2px);
+        }
+        #cursor-glow::after {
+            content: '';
+            width: 4px; height: 4px;
+            background: var(--text-main);
+            border-radius: 50%;
+        }
+        #cursor-glow.active {
+            width: 80px; height: 80px;
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--neon-blue);
+        }
+
+        /* 5. ENHANCED GLASS UI */
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid var(--glass-border);
+            border-top: 1px solid rgba(255, 255, 255, 0.2); /* Edge highlight */
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.02), 
+                        0 20px 40px -10px rgba(0, 0, 0, 0.7);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease;
+        }
+
+        /* Light Sweep Effect */
+        .glass-panel::after {
+            content: '';
+            position: absolute;
+            top: 0; left: -150%;
+            width: 50%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+            transform: skewX(-25deg);
+            transition: 0.7s ease;
+        }
+        .glass-panel:hover::after { left: 150%; }
+        .glass-panel:hover {
+            box-shadow: inset 0 0 30px rgba(188, 19, 254, 0.1), 
+                        0 30px 60px -15px rgba(0, 243, 255, 0.2);
+            border-color: rgba(0, 243, 255, 0.3);
+        }
+
+        /* 6. MICRO INTERACTIONS: Ripple Button */
+        .cta-btn {
+            padding: 20px 48px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: white;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 50px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            font-family: 'Space Grotesk', sans-serif;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .cta-btn:hover {
+            background: rgba(255,255,255,0.08);
+            border-color: var(--neon-purple);
+            box-shadow: 0 0 30px rgba(188, 19, 254, 0.4);
+        }
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            transform: scale(0);
+            animation: ripple-anim 0.6s linear;
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+        @keyframes ripple-anim {
+            to { transform: scale(4); opacity: 0; }
+        }
+
+        /* Layout Setup */
+        .container {
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Hero Section */
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 0 20px;
+        }
+        .hero h1 {
+            font-size: clamp(3.5rem, 10vw, 8rem);
+            font-weight: 900;
+            line-height: 1;
+            margin-bottom: 24px;
+            letter-spacing: -3px;
+            text-transform: uppercase;
+            text-shadow: 0 0 40px rgba(0, 243, 255, 0.3);
+        }
+        .hero p {
+            font-size: clamp(1.1rem, 2vw, 1.5rem);
+            color: var(--text-muted);
+            max-width: 650px;
+            margin-bottom: 50px;
+            line-height: 1.6;
+        }
+
+        /* 4. CINEMATIC SCROLL: Content Sections */
+        .section {
+            padding: 150px 5vw;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            perspective: 1000px; /* For 3D Scroll effects */
+        }
+        .section-title {
+            font-size: clamp(2.5rem, 5vw, 5rem);
+            margin-bottom: 80px;
+            text-align: center;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 40px;
+        }
+        .card {
+            padding: 50px 40px;
+            height: 400px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+        .card h3 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: #fff;
+        }
+        .card p {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            line-height: 1.7;
+        }
+        
+        /* Progress Indicator */
+        .scroll-indicator {
+            position: fixed;
+            right: 30px; top: 50%;
+            transform: translateY(-50%);
+            display: flex; flex-direction: column; gap: 15px;
+            z-index: 50;
+        }
+        .dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            transition: 0.3s;
+        }
+        .dot.active {
+            background: var(--neon-blue);
+            box-shadow: 0 0 10px var(--neon-blue);
+            transform: scale(1.5);
+        }
+    </style>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+</head>
+<body>
+
+    <div class="fluid-bg"></div>
+    <div class="noise-overlay"></div>
+    <canvas id="webgl-canvas"></canvas>
+
+    <div id="cursor-glow"></div>
+
+    <div class="scroll-indicator">
+        <div class="dot active"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+    </div>
+
+    <div class="container">
+        
+        <section class="hero cinematic-section">
+            <h1 class="hero-title gs_reveal">
+                Beyond <br><span class="gradient-text">Reality</span>
+            </h1>
+            <p class="gs_reveal" style="transition-delay: 0.1s;">
+                Experience the nexus of design and deep technology. A WebGL-powered interface rendered in real-time with cinematic post-processing.
+            </p>
+            <button class="cta-btn glass-panel magnetic gs_reveal" style="transition-delay: 0.2s;">Initialize Sequence</button>
+        </section>
+
+        <section class="section cinematic-section">
+            <h2 class="section-title gradient-text gs_reveal">Neural Architecture</h2>
+            <div class="grid">
+                <div class="glass-panel card magnetic gs_parallax" data-speed="1.1">
+                    <h3>Quantum Bloom</h3>
+                    <p>UnrealBloomPass rendering engine creating hyper-realistic emissive light scattering across 3D geometries.</p>
+                </div>
+                <div class="glass-panel card magnetic gs_parallax" data-speed="1.3">
+                    <h3>Magnetic UI</h3>
+                    <p>Fluid mathematical cursor interpolation that pulls interface elements toward the user's focal point.</p>
+                </div>
+                <div class="glass-panel card magnetic gs_parallax" data-speed="1.2">
+                    <h3>Cinematic Depth</h3>
+                    <p>Multi-layered parallax utilizing GSAP ScrollTrigger to simulate physical camera lenses and depth of field.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="section cinematic-section" style="text-align: center; align-items: center;">
+            <div class="glass-panel" style="padding: 100px 50px; max-width: 800px; width: 100%;">
+                <h2 class="gradient-text" style="font-size: 3rem; margin-bottom: 20px;">The Future is Here.</h2>
+                <p style="color: var(--text-muted); font-size: 1.2rem;">Running at a smooth 60 Frames Per Second.</p>
+            </div>
+        </section>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+        import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+        import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+
+        gsap.registerPlugin(ScrollTrigger);
+
+        /* ==========================================
+           1. THREE.JS SCENE + BLOOM SETUP
+        ========================================== */
+        const canvas = document.getElementById('webgl-canvas');
+        const scene = new THREE.Scene();
+        // Fog for depth fading
+        scene.fog = new THREE.FogExp2(0x020005, 0.0015);
+
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 2000);
+        camera.position.z = 30;
+
+        const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Optimize performance
+
+        // Post-Processing (Bloom)
+        const renderScene = new RenderPass(scene, camera);
+        
+        // Resolution, strength, radius, threshold
+        const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 2.0, 1.0, 0.1);
+        
+        const composer = new EffectComposer(renderer);
+        composer.addPass(renderScene);
+        composer.addPass(bloomPass);
+
+        /* ==========================================
+           2. HERO SIGNATURE OBJECT (Orbiting Rings)
+        ========================================== */
+        const rings = new THREE.Group();
+        scene.add(rings);
+
+        // Materials designed to catch Bloom
+        const materialInner = new THREE.MeshStandardMaterial({
+            color: 0x000000,
+            emissive: 0x00f3ff, // Neon Blue
+            emissiveIntensity: 2,
+            wireframe: true
+        });
+
+        const materialOuter = new THREE.MeshStandardMaterial({
+            color: 0x000000,
+            emissive: 0xbc13fe, // Neon Purple
+            emissiveIntensity: 1.5,
+            wireframe: true
+        });
+
+        const geoInner = new THREE.TorusGeometry(8, 1.5, 16, 100);
+        const geoOuter = new THREE.TorusGeometry(14, 0.5, 16, 150);
+
+        const ringInner = new THREE.Mesh(geoInner, materialInner);
+        const ringOuter = new THREE.Mesh(geoOuter, materialOuter);
+        
+        // Tilt them slightly
+        ringInner.rotation.x = Math.PI / 3;
+        ringOuter.rotation.x = Math.PI / 2.5;
+        ringOuter.rotation.y = Math.PI / 4;
+
+        rings.add(ringInner);
+        rings.add(ringOuter);
+
+        // Add a pulsing light in the center
+        const pointLight = new THREE.PointLight(0xffffff, 2, 50);
+        rings.add(pointLight);
+
+        /* ==========================================
+           3. GLOWING PARTICLES (Stardust)
+        ========================================== */
+        const particlesGeometry = new THREE.BufferGeometry();
+        const particlesCount = 800; // Optimized count
+        const posArray = new Float32Array(particlesCount * 3);
+        const colorsArray = new Float32Array(particlesCount * 3);
+
+        const color1 = new THREE.Color(0x00f3ff);
+        const color2 = new THREE.Color(0xbc13fe);
+
+        for(let i = 0; i < particlesCount * 3; i+=3) {
+            posArray[i] = (Math.random() - 0.5) * 100;
+            posArray[i+1] = (Math.random() - 0.5) * 100;
+            posArray[i+2] = (Math.random() - 0.5) * 100;
+
+            const mixedColor = color1.clone().lerp(color2, Math.random());
+            colorsArray[i] = mixedColor.r;
+            colorsArray[i+1] = mixedColor.g;
+            colorsArray[i+2] = mixedColor.b;
+        }
+
+        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+        particlesGeometry.setAttribute('color', new THREE.BufferAttribute(colorsArray, 3));
+
+        const particlesMaterial = new THREE.PointsMaterial({
+            size: 0.15,
+            vertexColors: true,
+            blending: THREE.AdditiveBlending,
+            transparent: true,
+            opacity: 0.8
+        });
+
+        const particleMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+        scene.add(particleMesh);
+
+        /* ==========================================
+           4. RENDER LOOP & PARALLAX LOGIC
+        ========================================== */
+        const clock = new THREE.Clock();
+        let mouseX = 0;
+        let mouseY = 0;
+
+        window.addEventListener('mousemove', (event) => {
+            mouseX = (event.clientX / window.innerWidth - 0.5) * 2;
+            mouseY = -(event.clientY / window.innerHeight - 0.5) * 2;
+        });
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const elapsedTime = clock.getElapsedTime();
+
+            // Rotate Signature Object
+            ringInner.rotation.z = elapsedTime * 0.2;
+            ringOuter.rotation.z = -elapsedTime * 0.1;
+            ringOuter.rotation.x = (Math.PI / 2.5) + Math.sin(elapsedTime * 0.5) * 0.2;
+
+            // Pulse center light
+            pointLight.intensity = 2 + Math.sin(elapsedTime * 3) * 1;
+
+            // Slowly rotate particles
+            particleMesh.rotation.y = elapsedTime * 0.02;
+
+            // Camera Parallax effect (subtle)
+            camera.position.x += (mouseX * 5 - camera.position.x) * 0.05;
+            camera.position.y += (mouseY * 5 - camera.position.y) * 0.05;
+            camera.lookAt(scene.position);
+
+            // Use Composer instead of Renderer for Bloom
+            composer.render();
+        }
+        animate();
+
+        // Handle Resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            composer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+
+        /* ==========================================
+           5. CINEMATIC GSAP SCROLL EFFECTS
+        ========================================== */
+        
+        // Animate Signature Object on Scroll (Zoom & Spin)
+        gsap.to(rings.position, {
+            z: 20, // Moves toward camera
+            scrollTrigger: {
+                trigger: "body",
+                start: "top top",
+                end: "bottom bottom",
+                scrub: 1.5
+            }
+        });
+
+        gsap.to(rings.rotation, {
+            x: Math.PI * 2,
+            scrollTrigger: {
+                trigger: "body",
+                start: "top top",
+                end: "bottom bottom",
+                scrub: 2
+            }
+        });
+
+        // Cinematic Section Reveal (Blur & Scale)
+        gsap.utils.toArray('.cinematic-section').forEach((section, i) => {
+            // Update dots
+            ScrollTrigger.create({
+                trigger: section,
+                start: "top center",
+                end: "bottom center",
+                onToggle: (self) => {
+                    if(self.isActive) {
+                        document.querySelectorAll('.dot').forEach((d, index) => {
+                            d.classList.toggle('active', index === i);
+                        });
+                    }
+                }
+            });
+
+            // Initial Hero text animation
+            if(i === 0) {
+                gsap.fromTo(section.querySelectorAll('.gs_reveal'), 
+                    { y: 50, opacity: 0, filter: "blur(10px)" }, 
+                    { y: 0, opacity: 1, filter: "blur(0px)", duration: 1.5, stagger: 0.2, ease: "power4.out" }
+                );
+            } else {
+                // Scroll reveal for other sections
+                gsap.fromTo(section, 
+                    { opacity: 0, scale: 0.9, filter: "blur(15px)" }, 
+                    { 
+                        opacity: 1, scale: 1, filter: "blur(0px)", 
+                        duration: 1.2, 
+                        ease: "power3.out",
+                        scrollTrigger: {
+                            trigger: section,
+                            start: "top 80%",
+                        }
+                    }
+                );
+            }
+        });
+
+        // Depth Parallax on Cards
+        gsap.utils.toArray('.gs_parallax').forEach(card => {
+            const speed = card.dataset.speed;
+            gsap.to(card, {
+                y: () => -50 * speed,
+                ease: "none",
+                scrollTrigger: {
+                    trigger: card.parentElement,
+                    start: "top bottom",
+                    end: "bottom top",
+                    scrub: true
+                }
+            });
+        });
+
+        /* ==========================================
+           6. MICRO-INTERACTIONS
+        ========================================== */
+        
+        // Custom Cursor Logic
+        const cursorGlow = document.getElementById('cursor-glow');
+        let cursorX = window.innerWidth / 2;
+        let cursorY = window.innerHeight / 2;
+        
+        window.addEventListener('mousemove', (e) => {
+            cursorX = e.clientX;
+            cursorY = e.clientY;
+            cursorGlow.style.left = `${cursorX}px`;
+            cursorGlow.style.top = `${cursorY}px`;
+        });
+
+        // Magnetic Effect + Hover States
+        const magneticElements = document.querySelectorAll('.magnetic');
+        
+        magneticElements.forEach(elem => {
+            elem.addEventListener('mousemove', (e) => {
+                const rect = elem.getBoundingClientRect();
+                const x = e.clientX - rect.left - rect.width / 2;
+                const y = e.clientY - rect.top - rect.height / 2;
+                
+                // Pull element toward cursor smoothly
+                gsap.to(elem, { x: x * 0.2, y: y * 0.2, duration: 0.5, ease: "power2.out" });
+                cursorGlow.classList.add('active');
+            });
+
+            elem.addEventListener('mouseleave', () => {
+                // Snap back
+                gsap.to(elem, { x: 0, y: 0, duration: 0.7, ease: "elastic.out(1, 0.3)" });
+                cursorGlow.classList.remove('active');
+            });
+        });
+
+        // Button Ripple Effect
+        const buttons = document.querySelectorAll('.cta-btn');
+        buttons.forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                const rect = btn.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                const ripple = document.createElement('span');
+                ripple.classList.add('ripple');
+                ripple.style.left = `${x}px`;
+                ripple.style.top = `${y}px`;
+                
+                // Size the ripple based on button width
+                const size = Math.max(rect.width, rect.height);
+                ripple.style.width = ripple.style.height = `${size}px`;
+                // Adjust position to center of click
+                ripple.style.transform = `translate(-50%, -50%) scale(0)`;
+                
+                btn.appendChild(ripple);
+                
+                setTimeout(() => {
+                    ripple.remove();
+                }, 600);
+            });
+        });
+    </script>
+</body>
+</html>
