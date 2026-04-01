@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VENOM | Architect - Neural Web Lab</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Geo&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/dracula.min.css"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/javascript/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/css/css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/htmlmixed/htmlmixed.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/xml/xml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/python/python.min.js"></script>
+
+    <style>
+        :root {
+            --bg-primary: #000000;
+            --bg-secondary: #000000;
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255,255,255,0.65);
+            --messenger-blue: #0084FF;
+            --blue-glow: #60a5fa;
+            --border-subtle: rgba(255, 255, 255, 0.08);
+            --correct-green: #22c55e;
+            --wrong-red: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: #000;
+            z-index: -5;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #000;
+            color: var(--text-primary);
+            overflow-x: hidden;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            min-height: 100vh;
+        }
+
+        /* Stars Background */
+        .stars-container {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -4; overflow: hidden; pointer-events: none;
+        }
+
+        .star {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            box-shadow: 0 0 4px rgba(255, 255, 255, 0.8);
+            animation: twinkle 4s ease-in-out infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.4; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+
+        /* Spotlight Effects */
+        .spotlight-container {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 1; pointer-events: none; overflow: hidden;
+        }
+
+        .spotlight-beam {
+            position: absolute; top: -10%; left: -10%; width: 120%; height: 120%;
+            background: radial-gradient(ellipse 400px 2000px at 8% 5%, rgba(96, 165, 250, 0.25) 0%, rgba(96, 165, 250, 0.18) 15%, rgba(96, 165, 250, 0.12) 30%, rgba(96, 165, 250, 0.08) 45%, rgba(0, 132, 255, 0.04) 60%, transparent 75%);
+            transform: rotate(-40deg); transform-origin: 8% 5%;
+            animation: beamBreath 8s ease-in-out infinite;
+            mix-blend-mode: screen; filter: blur(80px);
+        }
+
+        .spotlight-glow {
+            position: absolute; top: -10%; left: -10%; width: 120%; height: 120%;
+            background: radial-gradient(ellipse 280px 1600px at 8% 5%, rgba(96, 165, 250, 0.32) 0%, rgba(96, 165, 250, 0.22) 18%, rgba(96, 165, 250, 0.14) 35%, rgba(0, 132, 255, 0.06) 55%, transparent 72%);
+            transform: rotate(-40deg); transform-origin: 8% 5%;
+            animation: beamBreath 8s ease-in-out infinite 0.5s;
+            mix-blend-mode: screen; filter: blur(50px);
+        }
+
+        @keyframes beamBreath {
+            0%, 100% { opacity: 0.85; }
+            50% { opacity: 1; }
+        }
+
+        .light-particle {
+            position: absolute; width: 2px; height: 2px;
+            background: rgba(255, 255, 255, 0.9); border-radius: 50%;
+            box-shadow: 0 0 8px rgba(96, 165, 250, 0.9);
+            animation: particleFlow 15s ease-in-out infinite;
+        }
+
+        @keyframes particleFlow {
+            0% { opacity: 0; transform: translate(0, 0) scale(0); }
+            10% { opacity: 1; }
+            90% { opacity: 0.6; }
+            100% { opacity: 0; transform: translate(500px, 600px) scale(1.4); }
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+            background: transparent !important; backdrop-filter: none !important; border: none !important;
+        }
+
+        .nav-container {
+            max-width: 1400px; margin: 0 auto; padding: 18px 40px;
+            display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 1;
+        }
+
+        .logo {
+            font-family: 'Geo', sans-serif; font-size: 42px; font-weight: 400; letter-spacing: 5px;
+            background: linear-gradient(180deg, #ffffff 0%, #f5f5f5 20%, #e8e8e8 40%, #d0d0d0 60%, #b8b8b8 80%, #a0a0a0 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            cursor: pointer; transition: all 0.4s ease; text-transform: uppercase;
+            filter: drop-shadow(1px 1px 0px rgba(255,255,255,0.3)) drop-shadow(2px 2px 1px rgba(0,0,0,0.3)) drop-shadow(0px 4px 8px rgba(0,0,0,0.4));
+        }
+
+        .logo:hover { transform: scale(1.06) translateY(-1px); letter-spacing: 6px; }
+
+        .module-badge {
+            display: flex; align-items: center; gap: 12px;
+            background: rgba(0, 132, 255, 0.08); border: 1px solid rgba(0, 132, 255, 0.2);
+            padding: 8px 20px; border-radius: 6px; backdrop-filter: blur(10px);
+        }
+
+        .module-label {
+            font-size: 12px; font-weight: 800; letter-spacing: 2.5px;
+            color: rgba(255,255,255,0.9); text-transform: uppercase; text-shadow: 0 0 10px rgba(96, 165, 250, 0.5);
+        }
+
+        /* Main Content */
+        .main-content {
+            position: relative; z-index: 2; padding-top: 100px; padding-bottom: 60px; min-height: 100vh;
+        }
+
+        .container { max-width: 1600px; margin: 0 auto; padding: 0 40px; }
+
+        /* Hero Section */
+        .hero-section { text-align: center; margin-bottom: 32px; animation: fadeInUp 1s ease-out; }
+
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+        .hero-title { font-size: clamp(40px, 6vw, 72px); font-weight: 900; line-height: 1.05; letter-spacing: -3px; margin-bottom: 20px; }
+        .hero-title .highlight {
+            background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 25%, #60a5fa 50%, #0084FF 75%, #60a5fa 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-size: 200% auto;
+            animation: shimmer 3s linear infinite;
+        }
+        @keyframes shimmer { 0% { background-position: 0% center; } 100% { background-position: 200% center; } }
+        .hero-title .normal {
+            background: linear-gradient(180deg, #ffffff 0%, #e0e0e0 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .hero-subtitle { font-size: 15px; color: var(--text-secondary); max-width: 700px; margin: 0 auto; line-height: 1.6; }
+
+        /* Workspace Grid */
+        .workspace-grid {
+            display: grid; grid-template-columns: 360px 1fr; gap: 24px;
+            animation: fadeInUp 1s ease-out 0.2s both; height: 85vh; max-height: 950px; min-height: 700px;
+        }
+        .workspace-grid > .glass-panel:first-child { margin-left: -70px; }
+
+        /* Glass Panel */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 12px; backdrop-filter: blur(10px); overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); position: relative; display: flex; flex-direction: column; height: 100%;
+        }
+        .glass-panel::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(96, 165, 250, 0.5), transparent); opacity: 0; transition: opacity 0.4s;
+        }
+        .glass-panel:hover {
+            border-color: rgba(0, 132, 255, 0.4); box-shadow: 0 8px 32px rgba(0, 132, 255, 0.15), 0 0 60px rgba(0, 132, 255, 0.08); transform: translateY(-2px);
+        }
+        .glass-panel:hover::before { opacity: 1; }
+
+        /* Panel Header */
+        .panel-header {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding: 18px 24px;
+            display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; position: relative;
+        }
+        .panel-title {
+            font-size: 11px; font-weight: 800; letter-spacing: 2.5px; color: var(--messenger-blue);
+            text-transform: uppercase; text-shadow: 0 0 20px rgba(0, 132, 255, 0.3); position: absolute; left: 50%; transform: translateX(-50%);
+        }
+        .window-controls { display: flex; gap: 6px; }
+        .window-dot { width: 12px; height: 12px; border-radius: 50%; }
+        .window-dot:nth-child(1) { background: #ff5f56; box-shadow: 0 0 10px #ff5f56; }
+        .window-dot:nth-child(2) { background: #ffbd2e; box-shadow: 0 0 10px #ffbd2e; }
+        .window-dot:nth-child(3) { background: #27c93f; box-shadow: 0 0 10px #27c93f; }
+
+        .panel-content { padding: 24px; flex: 1; overflow: hidden; display: flex; flex-direction: column; min-height: 0; }
+
+        /* Chat Messages */
+        .chat-messages {
+            flex: 1; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; gap: 12px;
+            margin-bottom: 20px; min-height: 0; max-height: 100%; padding-right: 8px;
+        }
+        .chat-messages::-webkit-scrollbar { width: 6px; }
+        .chat-messages::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.3); border-radius: 3px; }
+        .chat-messages::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.5); border-radius: 3px; transition: background 0.3s; }
+        .chat-messages::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, 0.7); }
+
+        .message { padding: 12px 16px; border-radius: 12px; max-width: 90%; font-size: 13px; line-height: 1.5; animation: messageSlideIn 0.3s ease-out; word-wrap: break-word; flex-shrink: 0; }
+        @keyframes messageSlideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .message.user { align-self: flex-end; background: linear-gradient(135deg, var(--messenger-blue), #0066cc); color: white; font-weight: 500; }
+        .message.assistant { align-self: flex-start; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .message.system { align-self: flex-start; background: rgba(34, 197, 94, 0.1); border: 1px solid var(--correct-green); color: var(--correct-green); }
+        .message.error { align-self: flex-start; background: rgba(239, 68, 68, 0.1); border: 1px solid var(--wrong-red); color: #fecaca; }
+
+        /* Input Area */
+        .chat-input-container { margin-top: auto; flex-shrink: 0; padding-top: 12px; border-top: 1px solid rgba(255, 255, 255, 0.05); }
+        .chat-input { display: flex; gap: 10px; margin-bottom: 12px; }
+        .chat-textarea {
+            flex: 1; padding: 12px 14px; background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px;
+            color: var(--text-primary); font-size: 14px; font-family: inherit; resize: vertical; min-height: 80px; max-height: 150px; outline: none; transition: all 0.3s;
+        }
+        .chat-textarea:focus { background: rgba(0, 0, 0, 0.7); border-color: var(--messenger-blue); box-shadow: 0 0 0 3px rgba(0, 132, 255, 0.15); }
+        .chat-textarea::placeholder { color: rgba(255, 255, 255, 0.3); }
+
+        /* Backend Toggle Option */
+        .generation-options {
+            display: flex; gap: 15px; margin-bottom: 12px; font-size: 12px; color: var(--text-secondary);
+            padding: 8px; background: rgba(0, 132, 255, 0.05); border-radius: 6px; border: 1px solid rgba(0, 132, 255, 0.1);
+        }
+        .toggle-checkbox {
+            appearance: none; width: 16px; height: 16px; border: 1px solid rgba(255,255,255,0.3); border-radius: 4px;
+            background: rgba(0,0,0,0.5); cursor: pointer; position: relative; display: inline-block; vertical-align: middle;
+        }
+        .toggle-checkbox:checked { background: var(--messenger-blue); border-color: var(--messenger-blue); }
+        .toggle-checkbox:checked::after {
+            content: ''; position: absolute; left: 4px; top: 1px; width: 4px; height: 8px;
+            border: solid white; border-width: 0 2px 2px 0; transform: rotate(45deg);
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 12px 24px; border-radius: 8px; font-size: 11px; font-weight: 700; letter-spacing: 1.5px;
+            text-transform: uppercase; cursor: pointer; transition: all 0.3s; border: none; display: inline-flex;
+            align-items: center; justify-content: center; gap: 8px; position: relative; overflow: hidden;
+        }
+        .btn::before {
+            content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent); transition: left 0.5s;
+        }
+        .btn:hover:not(:disabled)::before { left: 100%; }
+        .btn-primary { background: linear-gradient(135deg, var(--messenger-blue), #0066cc); color: white; box-shadow: 0 4px 20px rgba(0, 132, 255, 0.4); animation: btnGlow 3s ease-in-out infinite; }
+        @keyframes btnGlow { 0%, 100% { box-shadow: 0 4px 20px rgba(0, 132, 255, 0.4); } 50% { box-shadow: 0 6px 30px rgba(0, 132, 255, 0.6); } }
+        .btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 40px rgba(0, 132, 255, 0.6); }
+        .btn-primary:disabled { opacity: 0.3; cursor: not-allowed; animation: none; }
+        .btn-secondary { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.15); color: var(--text-primary); }
+        .btn-secondary:hover { background: rgba(255, 255, 255, 0.1); border-color: var(--messenger-blue); }
+        .btn-action { padding: 8px 16px; font-size: 10px; }
+
+        /* Preview Panel */
+        .preview-content { flex: 1; position: relative; background: var(--bg-primary); overflow: hidden; min-height: 0; }
+
+        /* Neural Build Overlay */
+        .neural-build-overlay {
+            position: absolute; inset: 0; background: rgba(0,0,0,0.88); backdrop-filter: blur(6px);
+            z-index: 8; opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+        }
+        .neural-build-overlay.active { opacity: 1; pointer-events: auto; }
+        .neural-build-overlay::after { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at center, transparent 40%, rgba(0, 0, 0, 0.6) 100%); pointer-events: none; }
+        .neural-grid {
+            position: absolute; inset: 0; background: linear-gradient(rgba(0,132,255,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(0,132,255,0.08) 1px, transparent 1px);
+            background-size: 40px 40px; animation: gridShift 2s linear infinite;
+        }
+        @keyframes gridShift { from { background-position: 0 0; } to { background-position: 40px 40px; } }
+        .neural-scan {
+            position: absolute; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, transparent, #0084ff, transparent);
+            box-shadow: 0 0 25px rgba(0,132,255,0.9); animation: scanMove 1.6s cubic-bezier(0.4, 0.0, 0.2, 1) infinite; mix-blend-mode: screen;
+        }
+        @keyframes scanMove { 0% { top: 0%; opacity: 0; } 20% { opacity: 1; } 80% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
+        .neural-status {
+            position: absolute; bottom: 24px; left: 24px; display: flex; align-items: center; gap: 10px;
+            font-size: 12px; letter-spacing: 2px; color: #60a5fa; text-transform: uppercase; font-family: 'JetBrains Mono', monospace; opacity: 0.85;
+        }
+        #neuralStatusText { transition: opacity 0.25s ease; }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #0084ff; box-shadow: 0 0 10px #0084ff; animation: pulseDot 1s infinite; }
+        @keyframes pulseDot { 50% { transform: scale(1.5); opacity: 0.5; } }
+
+        .preview-frame, .code-editor-view { position: absolute; inset: 0; }
+        .preview-frame {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: #ffffff; /* Explicitly set to white to avoid transparent/black background issues */
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        .preview-frame.visible { opacity: 1; }
+
+        /* Empty State */
+        .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; background: #000000; position: relative; overflow: hidden; transition: filter 0.3s ease; }
+        .empty-state::before {
+            content: ''; position: absolute; top: 50%; left: 50%; width: 600px; height: 600px;
+            background: radial-gradient(circle, rgba(0, 132, 255, 0.08) 0%, rgba(96, 165, 250, 0.04) 25%, transparent 60%);
+            transform: translate(-50%, -50%); animation: pulse 6s ease-in-out infinite;
+        }
+        .empty-state::after {
+            content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, transparent 0%, rgba(0, 132, 255, 0.03) 50%, transparent 100%), linear-gradient(0deg, transparent 0%, rgba(0, 132, 255, 0.03) 50%, transparent 100%);
+            background-size: 50px 50px; animation: gridMove 20s linear infinite; opacity: 0.3;
+        }
+        @keyframes gridMove { 0% { background-position: 0 0, 0 0; } 100% { background-position: 50px 50px, 50px 50px; } }
+        @keyframes pulse { 0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.4; } 50% { transform: translate(-50%, -50%) scale(1.3); opacity: 0.7; } }
+        .empty-state-content { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 32px; }
+        .empty-state-icon { position: relative; width: 140px; height: 140px; display: flex; align-items: center; justify-content: center; }
+        .empty-state-icon::before {
+            content: ''; position: absolute; inset: -10px; border: 2px solid transparent; border-top-color: rgba(0, 132, 255, 0.4); border-right-color: rgba(0, 132, 255, 0.4); border-radius: 50%; animation: rotate 4s linear infinite;
+        }
+        .empty-state-icon::after {
+            content: ''; position: absolute; inset: 5px; border: 2px solid transparent; border-bottom-color: rgba(96, 165, 250, 0.3); border-left-color: rgba(96, 165, 250, 0.3); border-radius: 50%; animation: rotate 5s linear infinite reverse;
+        }
+        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .empty-state-icon-inner {
+            position: relative; width: 80px; height: 80px; background: rgba(0, 132, 255, 0.05); border: 2px solid rgba(0, 132, 255, 0.2); border-radius: 20px; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 30px rgba(0, 132, 255, 0.2), inset 0 0 20px rgba(0, 132, 255, 0.05); animation: iconFloat 4s ease-in-out infinite;
+        }
+        @keyframes iconFloat { 0%, 100% { transform: translateY(0px) scale(1); } 50% { transform: translateY(-15px) scale(1.05); } }
+        .empty-state-icon i { font-size: 40px; color: var(--messenger-blue); text-shadow: 0 0 30px rgba(0, 132, 255, 0.8); filter: drop-shadow(0 0 10px rgba(0, 132, 255, 0.6)); }
+        .empty-state-divider {
+            width: 250px; height: 1px; background: linear-gradient(90deg, transparent 0%, rgba(0, 132, 255, 0.3) 10%, var(--messenger-blue) 50%, rgba(0, 132, 255, 0.3) 90%, transparent 100%); position: relative; box-shadow: 0 0 20px rgba(0, 132, 255, 0.5); animation: dividerPulse 3s ease-in-out infinite;
+        }
+        .empty-state-divider::before {
+            content: ''; position: absolute; left: 50%; top: 50%; width: 8px; height: 8px; background: var(--messenger-blue); border-radius: 50%; transform: translate(-50%, -50%); box-shadow: 0 0 15px rgba(0, 132, 255, 0.8); animation: centerDot 2s ease-in-out infinite;
+        }
+        @keyframes dividerPulse { 0%, 100% { box-shadow: 0 0 10px rgba(0, 132, 255, 0.3); opacity: 0.6; } 50% { box-shadow: 0 0 30px rgba(0, 132, 255, 0.7); opacity: 1; } }
+        @keyframes centerDot { 0%, 100% { transform: translate(-50%, -50%) scale(1); box-shadow: 0 0 10px rgba(0, 132, 255, 0.5); } 50% { transform: translate(-50%, -50%) scale(1.5); box-shadow: 0 0 25px rgba(0, 132, 255, 1); } }
+        .empty-state-text { text-align: center; }
+        .empty-state-title {
+            font-size: 24px; font-weight: 700; background: linear-gradient(135deg, #ffffff 0%, var(--messenger-blue) 50%, #ffffff 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-size: 200% auto; animation: shimmer 3s linear infinite; margin-bottom: 12px; letter-spacing: 2px; text-shadow: 0 0 20px rgba(0, 132, 255, 0.3);
+        }
+        .empty-state-subtitle { font-size: 14px; line-height: 1.8; max-width: 350px; color: rgba(255, 255, 255, 0.5); }
+        .empty-state-dots { display: flex; gap: 12px; margin-top: 24px; }
+        .empty-state-dot { width: 10px; height: 10px; border-radius: 50%; background: rgba(0, 132, 255, 0.3); border: 2px solid rgba(0, 132, 255, 0.5); animation: dotPulse 2s ease-in-out infinite; }
+        .empty-state-dot:nth-child(1) { animation-delay: 0s; } .empty-state-dot:nth-child(2) { animation-delay: 0.4s; } .empty-state-dot:nth-child(3) { animation-delay: 0.8s; }
+        @keyframes dotPulse { 0%, 100% { transform: scale(0.8); background: rgba(0, 132, 255, 0.3); border-color: rgba(0, 132, 255, 0.5); box-shadow: 0 0 5px rgba(0, 132, 255, 0.3); } 50% { transform: scale(1.4); background: var(--messenger-blue); border-color: var(--messenger-blue); box-shadow: 0 0 20px rgba(0, 132, 255, 1); } }
+        .empty-state-particles { position: absolute; inset: 0; pointer-events: none; }
+        .particle { position: absolute; width: 3px; height: 3px; background: rgba(0, 132, 255, 0.6); border-radius: 50%; box-shadow: 0 0 10px rgba(0, 132, 255, 0.8); }
+        .particle:nth-child(1) { left: 10%; top: 20%; animation: particleFloat 8s ease-in-out infinite; } .particle:nth-child(2) { left: 80%; top: 30%; animation: particleFloat 10s ease-in-out infinite 2s; } .particle:nth-child(3) { left: 30%; top: 70%; animation: particleFloat 12s ease-in-out infinite 4s; } .particle:nth-child(4) { left: 70%; top: 80%; animation: particleFloat 9s ease-in-out infinite 1s; } .particle:nth-child(5) { left: 50%; top: 10%; animation: particleFloat 11s ease-in-out infinite 3s; }
+        @keyframes particleFloat { 0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.3; } 25% { transform: translate(30px, -30px) scale(1.2); opacity: 0.8; } 50% { transform: translate(-20px, 40px) scale(0.8); opacity: 0.5; } 75% { transform: translate(40px, 20px) scale(1.1); opacity: 0.9; } }
+
+        /* Code Editor View */
+        .code-editor-view { display: flex; background: #020617; z-index: 3; }
+        .file-sidebar { width: 280px; background: #0b1220; border-right: 1px solid rgba(148, 163, 184, 0.2); display: flex; flex-direction: column; }
+
+        .upload-area { padding: 12px; border-bottom: 1px solid rgba(148,163,184,0.1); display: flex; gap: 8px; justify-content: center;}
+
+        .file-tree { flex: 1; overflow-y: auto; padding: 12px; }
+        .file-tree-item { display: flex; align-items: center; gap: 8px; padding: 8px 12px; cursor: pointer; border-radius: 6px; font-size: 13px; transition: all 0.2s; }
+        .file-tree-item:hover { background: rgba(56, 189, 248, 0.1); color: var(--blue-glow); }
+        .file-tree-item.active { background: rgba(168, 85, 247, 0.1); color: var(--messenger-blue); }
+
+        .editor-area { flex: 1; display: flex; flex-direction: column; }
+        .editor-tabs { display: flex; gap: 2px; background: #0b1220; border-bottom: 1px solid rgba(148, 163, 184, 0.2); padding: 0 8px; overflow-x: auto; }
+        .editor-tab { display: inline-flex; align-items: center; gap: 8px; background: #020617; border: none; color: var(--text-secondary); padding: 10px 16px; font-size: 12px; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+        .editor-tab:hover { color: var(--text-primary); background: #111827; }
+        .editor-tab.active { background: #0b0f17; color: var(--blue-glow); border-bottom: 2px solid var(--blue-glow); }
+        .tab-name { pointer-events: none; }
+        .tab-close { font-size: 10px; opacity: 0.5; padding: 2px; border-radius: 50%; transition: all 0.2s; }
+        .tab-close:hover { opacity: 1; color: var(--wrong-red); background: rgba(239, 68, 68, 0.1); }
+        .editor-container { flex: 1; overflow: hidden; }
+
+        /* CodeMirror */
+        .CodeMirror { height: 100% !important; font-size: 14px; font-family: 'Consolas', 'Monaco', monospace; }
+        .CodeMirror-gutters { background: #0a0e14 !important; border-right: 1px solid #1c273a !important; }
+        .CodeMirror-linenumber { color: #3b82f6 !important; }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .workspace-grid { grid-template-columns: 1fr; height: auto; min-height: 600px; }
+            .workspace-grid > .glass-panel:first-child { margin-left: 0; height: 500px; }
+            .workspace-grid > .glass-panel:last-child { height: 600px; }
+            .code-editor-view { flex-direction: column; }
+            .file-sidebar { width: 100%; max-height: 200px; }
+        }
+        @media (max-width: 768px) {
+            .container { padding: 0 24px; } .nav-container { padding: 16px 24px; } .logo { font-size: 32px; } .hero-title { font-size: 36px; } .workspace-grid { gap: 16px; } .chat-textarea { min-height: 60px; }
+        }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div class="stars-container" id="starsContainer"></div>
+
+    <div class="spotlight-container">
+        <div class="spotlight-beam"></div>
+        <div class="spotlight-glow"></div>
+        <div class="light-particle" style="left: 3%; top: 2%; animation-delay: 0s;"></div>
+        <div class="light-particle" style="left: 8%; top: 6%; animation-delay: 3s;"></div>
+        <div class="light-particle" style="left: 14%; top: 12%; animation-delay: 6s;"></div>
+        <div class="light-particle" style="left: 20%; top: 18%; animation-delay: 2s;"></div>
+        <div class="light-particle" style="left: 26%; top: 24%; animation-delay: 5s;"></div>
+    </div>
+
+    <nav>
+        <div class="nav-container">
+            <div class="logo" onclick="window.location.href='/'">VENOM</div>
+            <div class="module-badge">
+                <span class="module-label">MODULE // ARCHITECT</span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <div class="container">
+            <div class="hero-section">
+                <h1 class="hero-title">
+                    <span class="normal">Build</span> <span class="highlight">Websites</span><br>
+                    <span class="normal">With</span> <span class="highlight">Natural Language</span>
+                </h1>
+                <p class="hero-subtitle">
+                    Natural language web development. Describe your vision or upload existing files, and watch as production-ready code generates automatically with AI-powered intelligence.
+                </p>
+            </div>
+
+            <div class="workspace-grid">
+                <div class="glass-panel">
+                    <div class="panel-header">
+                        <div style="width: 60px;"></div>
+                        <span class="panel-title">Command Console</span>
+                        <div style="width: 60px;"></div>
+                    </div>
+
+                    <div class="panel-content">
+                        <div class="chat-messages" id="chatMessages">
+                            <div class="message system">
+                                🚀 System initialized. Ready to generate web projects or modify uploaded files!
+                            </div>
+                        </div>
+
+                        <div class="chat-input-container">
+
+                            <div class="generation-options">
+                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                    <input type="checkbox" id="includeBackendToggle" class="toggle-checkbox">
+                                    <span>Build Backend Architecture (Node.js/Python)</span>
+                                </label>
+                            </div>
+
+                            <div class="chat-input">
+                                <textarea
+                                    id="commandInput"
+                                    class="chat-textarea"
+                                    placeholder="E.g., Create a portfolio website with a dark theme and projects section..."
+                                ></textarea>
+                            </div>
+                            <button class="btn btn-primary" id="generateBtn" onclick="handleCommand()">
+                                <i class="fa-solid fa-bolt"></i>
+                                <span>Generate</span>
+                            </button>
+
+                            <div class="chat-input hidden" id="modifyContainer" style="margin-top: 12px;">
+                                <textarea
+                                    id="modifyInput"
+                                    class="chat-textarea"
+                                    placeholder="E.g., Add a contact form and smooth scroll..."
+                                ></textarea>
+                            </div>
+                            <button class="btn btn-primary hidden" id="modifyBtn" onclick="handleModify()" style="margin-top: 12px;">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                                <span>Modify</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-panel">
+                    <div class="panel-header">
+                        <div class="window-controls">
+                            <div class="window-dot"></div>
+                            <div class="window-dot"></div>
+                            <div class="window-dot"></div>
+                        </div>
+                        <span class="panel-title" id="viewTitle">Preview</span>
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn btn-secondary" id="toggleViewBtn" onclick="toggleView()" style="display: none;">
+                                <i class="fa-solid fa-code"></i>
+                                <span>Code</span>
+                            </button>
+                            <button class="btn btn-secondary" onclick="openPreviewInNewTab()" id="openBtn" style="display: none;">
+                                <i class="fa-solid fa-up-right-from-square"></i>
+                                <span>Open</span>
+                            </button>
+                            <button class="btn btn-secondary" onclick="downloadProject()" id="downloadBtn" style="display: none;">
+                                <i class="fa-solid fa-download"></i>
+                                <span>Download</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="preview-content">
+                        <div class="neural-build-overlay" id="neuralBuild">
+                            <div class="neural-grid"></div>
+                            <div class="neural-scan"></div>
+                            <div class="neural-status">
+                                <span class="status-dot"></span>
+                                <span id="neuralStatusText">Initializing neural build</span>
+                            </div>
+                        </div>
+
+                        <div class="empty-state" id="emptyState">
+                            <div class="empty-state-particles">
+                                <div class="particle"></div><div class="particle"></div><div class="particle"></div><div class="particle"></div><div class="particle"></div>
+                            </div>
+
+                            <div class="empty-state-content">
+                                <div class="empty-state-icon">
+                                    <div class="empty-state-icon-inner">
+                                        <i class="fa-solid fa-code"></i>
+                                    </div>
+                                </div>
+                                <div class="empty-state-divider"></div>
+                                <div class="empty-state-text">
+                                    <div class="empty-state-title">Nothing to Preview</div>
+                                    <div class="empty-state-subtitle">
+                                        Start by describing your web project in the Command Console, or upload an existing project to edit.
+                                    </div>
+                                </div>
+
+                                <button class="btn btn-secondary" onclick="document.getElementById('folderUploadInput').click()" style="margin-top: 10px; z-index: 10;">
+                                    <i class="fa-solid fa-folder-open"></i>
+                                    <span>Upload Existing Code / Folder</span>
+                                </button>
+                                <input type="file" id="folderUploadInput" webkitdirectory directory multiple style="display: none;" onchange="handleLocalFileUpload(event)">
+
+                                <div class="empty-state-dots">
+                                    <div class="empty-state-dot"></div><div class="empty-state-dot"></div><div class="empty-state-dot"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="code-editor-view hidden" id="codeEditorView">
+                            <div class="file-sidebar">
+                                <h3 style="color:var(--blue-glow); font-size:13px; padding: 12px; border-bottom: 1px solid rgba(148,163,184,0.1); margin: 0; display:flex; justify-content:space-between; align-items:center;">
+                                    Project Files
+                                    <i class="fa-solid fa-upload" style="cursor: pointer; color: var(--text-secondary);" title="Upload Files" onclick="document.getElementById('sidebarFileUpload').click()"></i>
+                                    <input type="file" id="sidebarFileUpload" multiple style="display: none;" onchange="handleLocalFileUpload(event)">
+                                </h3>
+                                <div id="fileTree" class="file-tree"></div>
+                                <div style="padding: 12px; border-top: 1px solid rgba(148,163,184,0.1); display:flex; gap:8px;">
+                                    <button class="btn btn-primary btn-action" onclick="saveActiveFile()" style="flex: 1;">
+                                        <i class="fa-solid fa-save"></i> <span>Save</span>
+                                    </button>
+                                    <button class="btn btn-secondary btn-action" onclick="revertActiveFile()" style="flex: 1;">
+                                        <i class="fa-solid fa-rotate-left"></i> <span>Revert</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="editor-area">
+                                <div id="editorTabs" class="editor-tabs"></div>
+                                <div class="editor-container">
+                                    <textarea id="codeEditor"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <iframe id="previewFrame" class="preview-frame"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://127.0.0.1:5001/api/architect';
+        let currentProjectId = null;
+        let currentFiles = {};
+        let editor = null;
+        let openTabs = [];
+        let activeTab = null;
+        let currentView = 'preview';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            createStars();
+            initCodeMirror();
+        });
+
+        function createStars() {
+            const container = document.getElementById('starsContainer');
+            for (let i = 0; i < 150; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                const size = Math.random() * 2 + 0.8;
+                star.style.width = `${size}px`;
+                star.style.height = `${size}px`;
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.top = `${Math.random() * 100}%`;
+                star.style.animationDuration = `${Math.random() * 3 + 3}s`;
+                star.style.animationDelay = `${Math.random() * 5}s`;
+                container.appendChild(star);
+            }
+        }
+
+        function addMessage(content, type = 'system') {
+            const chatMessages = document.getElementById('chatMessages');
+            const message = document.createElement('div');
+            message.className = `message ${type}`;
+            message.textContent = content;
+            chatMessages.appendChild(message);
+            chatMessages.scrollTo({ top: chatMessages.scrollHeight, behavior: 'smooth' });
+        }
+
+        const buildTexts = [
+            "Parsing intent vectors", "Constructing layout graph",
+            "Synthesizing components", "Applying design constraints", "Finalizing render pipeline"
+        ];
+        let buildIndex = 0;
+        let buildInterval = null;
+
+        function startNeuralBuild() {
+            const overlay = document.getElementById('neuralBuild');
+            const text = document.getElementById('neuralStatusText');
+            document.getElementById('emptyState').style.display = 'none';
+            document.getElementById('previewFrame').classList.remove('visible');
+
+            overlay.classList.add('active');
+            document.getElementById('generateBtn').disabled = true;
+            document.getElementById('modifyBtn').disabled = true;
+
+            buildIndex = 0;
+            text.textContent = buildTexts[0];
+            text.style.opacity = '1';
+
+            buildInterval = setInterval(() => {
+                text.style.opacity = '0';
+                setTimeout(() => {
+                    buildIndex++;
+                    text.textContent = buildTexts[buildIndex % buildTexts.length];
+                    text.style.opacity = '1';
+                }, 200);
+            }, 900);
+        }
+
+        function stopNeuralBuild() {
+            clearInterval(buildInterval);
+            setTimeout(() => { document.getElementById('neuralBuild').classList.remove('active'); }, 200);
+            if (!currentProjectId && Object.keys(currentFiles).length === 0) document.getElementById('emptyState').style.display = 'flex';
+            document.getElementById('generateBtn').disabled = false;
+            document.getElementById('modifyBtn').disabled = false;
+        }
+
+        function toggleView() {
+            currentView = currentView === 'preview' ? 'code' : 'preview';
+            setView(currentView);
+        }
+
+        function setView(view) {
+            const codeView = document.getElementById('codeEditorView');
+            const previewFrame = document.getElementById('previewFrame');
+            const viewTitle = document.getElementById('viewTitle');
+            const toggleBtn = document.getElementById('toggleViewBtn');
+
+            if (view === 'code') {
+                codeView.classList.remove('hidden');
+                previewFrame.style.display = 'none';
+                viewTitle.textContent = 'Code Editor';
+                toggleBtn.innerHTML = '<i class="fa-solid fa-eye"></i><span>Preview</span>';
+                if (currentProjectId || Object.keys(currentFiles).length > 0) ensureEditorHasTab();
+            } else {
+                codeView.classList.add('hidden');
+                previewFrame.style.display = 'block';
+                viewTitle.textContent = 'Preview';
+                toggleBtn.innerHTML = '<i class="fa-solid fa-code"></i><span>Code</span>';
+                if (currentProjectId || Object.keys(currentFiles).length > 0) loadPreview(currentProjectId, true);
+            }
+        }
+
+        async function handleLocalFileUpload(event) {
+            const files = event.target.files;
+            if (!files || files.length === 0) return;
+
+            addMessage(`📥 Parsing ${files.length} uploaded files...`, 'system');
+
+            if (!currentProjectId) {
+                currentProjectId = 'local_upload_' + Date.now();
+            }
+
+            let filesProcessed = 0;
+
+            for(let i=0; i < files.length; i++) {
+                const file = files[i];
+                if(file.type.match('image.*') || file.name.endsWith('.pdf') || file.name.endsWith('.exe')) continue;
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    let relativePath = file.webkitRelativePath || file.name;
+                    if (file.webkitRelativePath && file.webkitRelativePath.includes('/')) {
+                        relativePath = file.webkitRelativePath.substring(file.webkitRelativePath.indexOf('/') + 1);
+                    }
+                    currentFiles[relativePath] = e.target.result;
+                    filesProcessed++;
+
+                    if(i === files.length - 1 || filesProcessed > 0) {
+                        postGenerationCleanup();
+                        setView('preview');
+                        addMessage(`✅ Successfully loaded ${filesProcessed} editable files into workspace. Generating live preview...`, 'system');
+                    }
+                };
+                reader.readAsText(file);
+            }
+
+            event.target.value = '';
+        }
+
+        async function handleCommand() {
+            const input = document.getElementById('commandInput');
+            let prompt = input.value.trim();
+            if (!prompt) return;
+
+            const includeBackend = document.getElementById('includeBackendToggle').checked;
+            if (includeBackend) {
+                prompt += "\n\nCRITICAL REQUIREMENT: The user has requested a backend. In addition to the frontend files, YOU MUST generate a complete backend server architecture (e.g., Python Flask/FastAPI or Node.js Express). Include API endpoints, routing, and basic database interaction logic in separate files (e.g. server.py or app.js).";
+            }
+
+            document.getElementById('chatMessages').innerHTML = '';
+            document.getElementById('editorTabs').innerHTML = '';
+            document.getElementById('fileTree').innerHTML = '';
+            openTabs = [];
+            activeTab = null;
+            if (editor) {
+                editor.setValue('');
+                editor.setOption('mode', 'null');
+            }
+
+            addMessage(includeBackend ? '🚀 System initialized. Generating Full-Stack project...' : '🚀 System initialized. Generating new project...', 'system');
+            addMessage(input.value.trim(), 'user');
+            input.value = '';
+
+            startNeuralBuild();
+
+            try {
+                const response = await fetch(`${API_BASE}/generate`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: prompt })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok || data.error) {
+                    addMessage(`Error: ${data.error || 'Failed to generate project.'}`, 'error');
+                    stopNeuralBuild();
+                    return;
+                }
+
+                currentProjectId = data.project_id;
+                currentFiles = data.file_contents;
+
+                addMessage(`✅ Project "${data.project_name}" created successfully!`, 'system');
+                addMessage(`Files: ${Object.keys(currentFiles).join(', ')}`, 'assistant');
+
+                stopNeuralBuild();
+                postGenerationCleanup();
+
+            } catch (error) {
+                addMessage(`Error: ${error.message}`, 'error');
+                stopNeuralBuild();
+            }
+        }
+
+        async function handleModify() {
+            const input = document.getElementById('modifyInput');
+            let prompt = input.value.trim();
+            if (!prompt || Object.keys(currentFiles).length === 0) return;
+
+            addMessage(prompt, 'user');
+            input.value = '';
+
+            startNeuralBuild();
+
+            try {
+                const payload = currentProjectId && currentProjectId.startsWith('local_upload_')
+                    ? { project_id: currentProjectId, prompt: prompt, files: currentFiles, is_local: true }
+                    : { project_id: currentProjectId, prompt: prompt };
+
+                const response = await fetch(`${API_BASE}/modify`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+
+                if (!response.ok || data.error) {
+                    addMessage(`Error: ${data.error || 'Failed to modify project.'}`, 'error');
+                    stopNeuralBuild();
+                    return;
+                }
+
+                currentFiles = data.file_contents;
+                addMessage(`✅ Modified: ${data.modified_files.join(', ')}`, 'system');
+
+                stopNeuralBuild();
+                postGenerationCleanup();
+
+                if (currentView === 'code' && activeTab && currentFiles[activeTab]) {
+                    editor.setValue(currentFiles[activeTab]);
+                }
+
+            } catch (error) {
+                addMessage(`Error: ${error.message}`, 'error');
+                stopNeuralBuild();
+            }
+        }
+
+        function postGenerationCleanup() {
+            document.getElementById('modifyContainer').classList.remove('hidden');
+            document.getElementById('modifyBtn').classList.remove('hidden');
+            document.getElementById('toggleViewBtn').style.display = 'inline-flex';
+            document.getElementById('openBtn').style.display = 'inline-flex';
+            document.getElementById('downloadBtn').style.display = 'inline-flex';
+            document.getElementById('emptyState').style.display = 'none';
+            buildFileTree();
+
+            // Ensure preview is generated if we default back to preview view
+            if (currentView === 'preview') {
+                loadPreview(currentProjectId, true);
+            }
+        }
+
+        // --- Local Preview Injection Engine ---
+        function generateLocalPreviewHTML() {
+            let htmlKey = Object.keys(currentFiles).find(f => f.toLowerCase() === 'index.html')
+                       || Object.keys(currentFiles).find(f => f.endsWith('.html'));
+
+            if (!htmlKey || !currentFiles[htmlKey]) {
+                return `
+                    <div style="color: black; font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; text-align: center; background: #ffffff;">
+                        <div>
+                            <h2>No HTML file found</h2>
+                            <p>Generate a web project or upload an .html file to view the preview.</p>
+                        </div>
+                    </div>
+                `;
+            }
+
+            let htmlContent = currentFiles[htmlKey];
+
+            // Inject CSS
+            htmlContent = htmlContent.replace(/<link\s+[^>]*rel=["']stylesheet["'][^>]*href=["']([^"']+)["'][^>]*>/gi, (match, href) => {
+                const cssFileName = href.split('/').pop().split('?')[0];
+                const cssKey = Object.keys(currentFiles).find(k => k.endsWith(cssFileName));
+                if (cssKey && currentFiles[cssKey]) {
+                    return `<style>\n/* Injected ${cssFileName} */\n${currentFiles[cssKey]}\n</style>`;
+                }
+                return match;
+            });
+
+            // Inject JS
+            htmlContent = htmlContent.replace(/<script\s+[^>]*src=["']([^"']+)["'][^>]*><\/script>/gi, (match, src) => {
+                const jsFileName = src.split('/').pop().split('?')[0];
+                const jsKey = Object.keys(currentFiles).find(k => k.endsWith(jsFileName));
+                if (jsKey && currentFiles[jsKey]) {
+                    return `<script>\n/* Injected ${jsFileName} */\n${currentFiles[jsKey]}\n<\/script>`;
+                }
+                return match;
+            });
+
+            return htmlContent;
+        }
+
+        // --- UPDATED ROBUST LOAD PREVIEW ---
+        function loadPreview(projectId, forceReload = false) {
+            const previewFrame = document.getElementById('previewFrame');
+
+            // Hide iframe to prep for new load
+            previewFrame.classList.remove('visible');
+
+            // 1. Attach the load listener BEFORE setting the source to avoid race conditions.
+            const onFrameLoad = () => {
+                previewFrame.classList.add('visible');
+            };
+            previewFrame.addEventListener('load', onFrameLoad, { once: true });
+
+            // 2. Failsafe Timeout: If the load event is missed/too fast, force it to be visible after 800ms
+            setTimeout(onFrameLoad, 800);
+
+            // --- Local Upload Preview Override ---
+            if (projectId && projectId.startsWith('local_upload_')) {
+                const localHTML = generateLocalPreviewHTML();
+                previewFrame.removeAttribute('src'); // clear remote src
+                previewFrame.srcdoc = localHTML;
+                return;
+            }
+
+            // --- Server Backend Preview ---
+            previewFrame.removeAttribute('srcdoc'); // Clear local injection
+
+            const htmlFile = Object.keys(currentFiles).find(f => f.endsWith('.html')) || 'index.html';
+            const url = `${API_BASE}/preview/${projectId}/${htmlFile}?v=${Date.now()}`;
+
+            // Trigger the actual load
+            previewFrame.src = url;
+        }
+
+        function openPreviewInNewTab() {
+            if (!currentProjectId && Object.keys(currentFiles).length === 0) return;
+
+            if (currentProjectId && currentProjectId.startsWith('local_upload_')) {
+                const localHTML = generateLocalPreviewHTML();
+                const blob = new Blob([localHTML], { type: 'text/html' });
+                const url = URL.createObjectURL(blob);
+                window.open(url, '_blank');
+                return;
+            }
+
+            const htmlFile = Object.keys(currentFiles).find(f => f.endsWith('.html')) || 'index.html';
+            window.open(`${API_BASE}/preview/${currentProjectId}/${htmlFile}`, '_blank');
+        }
+
+        function downloadProject() {
+            if (!currentProjectId && Object.keys(currentFiles).length === 0) return;
+
+            if (currentProjectId && !currentProjectId.startsWith('local_upload_')) {
+                window.open(`${API_BASE}/download/${currentProjectId}`, '_blank');
+            } else {
+                alert("To download locally edited files, we recommend saving them via your local IDE or setting up a local backend save pipeline. Ensure you copy your modifications!");
+            }
+        }
+
+        function initCodeMirror() {
+            editor = CodeMirror.fromTextArea(document.getElementById('codeEditor'), {
+                lineNumbers: true,
+                mode: 'null',
+                theme: 'dracula',
+                indentUnit: 2,
+                tabSize: 2,
+                lineWrapping: true,
+            });
+        }
+
+        function buildFileTree() {
+            const tree = document.getElementById('fileTree');
+            tree.innerHTML = '';
+            Object.keys(currentFiles).forEach(filename => {
+                const item = document.createElement('div');
+                item.className = 'file-tree-item';
+
+                let iconClass = 'fa-file-code';
+                if(filename.endsWith('.py')) iconClass = 'fa-brands fa-python';
+                if(filename.endsWith('.js')) iconClass = 'fa-brands fa-js';
+                if(filename.endsWith('.css')) iconClass = 'fa-brands fa-css3-alt';
+                if(filename.endsWith('.html')) iconClass = 'fa-brands fa-html5';
+
+                item.innerHTML = `<i class="fa-solid ${iconClass}"></i><span>${filename}</span>`;
+                item.onclick = () => openFile(filename);
+                tree.appendChild(item);
+            });
+
+            if(activeTab) {
+                document.querySelectorAll('.file-tree-item').forEach(item => {
+                    if (item.textContent.trim() === activeTab) item.classList.add('active');
+                });
+            }
+        }
+
+        function openFile(filename) {
+            if (!openTabs.includes(filename)) {
+                const tabs = document.getElementById('editorTabs');
+
+                const tab = document.createElement('div');
+                tab.className = 'editor-tab';
+                tab.id = `tab-${CSS.escape(filename)}`;
+                tab.onclick = () => activateTab(filename);
+
+                const nameSpan = document.createElement('span');
+                nameSpan.className = 'tab-name';
+                nameSpan.textContent = filename;
+
+                const closeIcon = document.createElement('i');
+                closeIcon.className = 'fa-solid fa-xmark tab-close';
+                closeIcon.onclick = (e) => {
+                    e.stopPropagation();
+                    closeTab(filename);
+                };
+
+                tab.appendChild(nameSpan);
+                tab.appendChild(closeIcon);
+                tabs.appendChild(tab);
+
+                openTabs.push(filename);
+            }
+            activateTab(filename);
+        }
+
+        function closeTab(filename) {
+            const tab = document.getElementById(`tab-${CSS.escape(filename)}`);
+            if (tab) tab.remove();
+
+            openTabs = openTabs.filter(t => t !== filename);
+
+            if (activeTab === filename) {
+                if (openTabs.length > 0) {
+                    activateTab(openTabs[openTabs.length - 1]);
+                } else {
+                    activeTab = null;
+                    editor.setValue('');
+                    editor.setOption('mode', 'null');
+                    document.querySelectorAll('.file-tree-item').forEach(item => item.classList.remove('active'));
+                }
+            }
+        }
+
+        function activateTab(filename) {
+            activeTab = filename;
+            document.querySelectorAll('.editor-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(`tab-${CSS.escape(filename)}`).classList.add('active');
+
+            document.querySelectorAll('.file-tree-item').forEach(item => item.classList.remove('active'));
+            const items = document.querySelectorAll('.file-tree-item');
+            items.forEach(item => {
+                if (item.textContent.trim() === filename) item.classList.add('active');
+            });
+
+            const content = currentFiles[filename] || '';
+            const mode = detectMode(filename);
+            editor.setOption('mode', mode);
+            editor.setValue(content);
+        }
+
+        function ensureEditorHasTab() {
+            if (!openTabs.length && Object.keys(currentFiles).length) {
+                const firstFile = Object.keys(currentFiles)[0];
+                openFile(firstFile);
+            }
+        }
+
+        async function saveActiveFile() {
+            if (!activeTab) return;
+            const content = editor.getValue();
+            currentFiles[activeTab] = content;
+
+            if (currentProjectId && currentProjectId.startsWith('local_upload_')) {
+                addMessage(`Saved ${activeTab} to browser memory.`, 'system');
+                if (activeTab.endsWith('.html') || activeTab.endsWith('.css') || activeTab.endsWith('.js')) {
+                    loadPreview(currentProjectId, true);
+                }
+                return;
+            }
+
+            try {
+                await fetch(`${API_BASE}/save-file`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ project_id: currentProjectId, filename: activeTab, content })
+                });
+                addMessage(`Saved ${activeTab} to server.`, 'system');
+                if (activeTab.endsWith('.html') || activeTab.endsWith('.css') || activeTab.endsWith('.js')) {
+                    loadPreview(currentProjectId, true);
+                }
+            } catch (err) {
+                addMessage(`Save failed: ${err.message}`, 'error');
+            }
+        }
+
+        function revertActiveFile() {
+            if (!activeTab) return;
+            editor.setValue(currentFiles[activeTab] || '');
+            addMessage(`Reverted ${activeTab}`, 'system');
+        }
+
+        function detectMode(filename) {
+            if (filename.endsWith('.js')) return 'javascript';
+            if (filename.endsWith('.css')) return 'css';
+            if (filename.endsWith('.html')) return 'htmlmixed';
+            if (filename.endsWith('.py')) return 'python';
+            return 'null';
+        }
+
+        document.getElementById('commandInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleCommand();
+            }
+        });
+
+        document.getElementById('modifyInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleModify();
+            }
+        });
+    </script>
+</body>
+</html>
