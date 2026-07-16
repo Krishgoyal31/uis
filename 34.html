@@ -1,0 +1,2187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KRISH GOYAL | FRAME 27</title>
+    <meta name="description" content="Portfolio of Krish Goyal, AI & ML Engineer. A cinematic digital experience.">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;1,400;1,500&family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        /* ==========================================
+           CSS VARIABLES & SYSTEM
+           ========================================== */
+        :root {
+            /* Colors */
+            --film-black: #080808;
+            --deep-black: #0D0D0D;
+            --warm-ivory: #F0EDE5;
+            --film-grey: #A5A19A;
+            --dark-stone: #292826;
+            --sig-orange: #FF4D00;
+            --nav-color: var(--warm-ivory); /* Dynamic based on section */
+            
+            /* Typography */
+            --font-sans: 'Manrope', sans-serif;
+            --font-serif: 'Instrument Serif', serif;
+            --font-mono: 'IBM Plex Mono', monospace;
+            
+            /* Layout */
+            --gutter: 20px;
+            --nav-height: 80px;
+            
+            /* Animation */
+            --ease-cinematic: cubic-bezier(0.76, 0, 0.24, 1);
+            --ease-snap: cubic-bezier(0.16, 1, 0.3, 1);
+            
+            @media (min-width: 768px) {
+                --gutter: 4vw;
+            }
+        }
+
+        /* ==========================================
+           RESET & BASE
+           ========================================== */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: initial; /* Handled by JS for precision or native snap */
+            background-color: var(--film-black);
+            font-size: 16px;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            color: var(--warm-ivory);
+            background-color: var(--film-black);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
+            width: 100%;
+        }
+
+        ::selection {
+            background: var(--sig-orange);
+            color: var(--film-black);
+        }
+
+        a, button {
+            text-decoration: none;
+            color: inherit;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        ul { list-style: none; }
+        
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* Typography Utilities */
+        .font-serif { font-family: var(--font-serif); font-weight: 400; }
+        .font-mono { font-family: var(--font-mono); font-weight: 400; }
+        .font-sans { font-family: var(--font-sans); }
+        .italic { font-style: italic; }
+        .text-orange { color: var(--sig-orange); }
+        .uppercase { text-transform: uppercase; }
+        
+        /* Layout Utilities */
+        .container {
+            width: 100%;
+            padding: 0 var(--gutter);
+        }
+
+        /* ==========================================
+           GLOBAL EFFECTS
+           ========================================== */
+        #grain {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.035;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        /* Cinematic Masking Utility */
+        .mask-wrap {
+            overflow: hidden;
+            display: block;
+            line-height: 1;
+        }
+        
+        .mask-inner {
+            display: block;
+            transform: translateY(105%);
+            transition: transform 1.2s var(--ease-cinematic);
+            will-change: transform;
+        }
+        
+        .is-revealed .mask-inner {
+            transform: translateY(0);
+        }
+
+        /* Transition Wipes */
+        .section-wipe {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            transform-origin: top;
+            background: currentColor;
+            z-index: 0;
+        }
+
+        /* ==========================================
+           INTRO SEQUENCE
+           ========================================== */
+        #intro-sequence {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: var(--film-black);
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: var(--warm-ivory);
+        }
+
+        .intro-content {
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .intro-small {
+            font-size: 10px;
+            letter-spacing: 0.1em;
+            opacity: 0;
+            margin-bottom: 2rem;
+            font-family: var(--font-mono);
+        }
+
+        .intro-name {
+            font-size: clamp(2rem, 5vw, 4rem);
+            font-weight: 800;
+            line-height: 1;
+            opacity: 0;
+        }
+
+        .intro-role {
+            font-size: clamp(1rem, 2vw, 1.5rem);
+            color: var(--film-grey);
+            margin-top: 0.5rem;
+            opacity: 0;
+            font-weight: 500;
+        }
+
+        .intro-meta {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--film-grey);
+            margin-top: 3rem;
+            display: flex;
+            gap: 2rem;
+            opacity: 0;
+        }
+
+        .intro-timeline-container {
+            width: 200px;
+            height: 1px;
+            background: rgba(255,255,255,0.1);
+            margin-top: 3rem;
+            position: relative;
+            opacity: 0;
+        }
+
+        .intro-timeline-fill {
+            position: absolute;
+            top: 0; left: 0; height: 100%; width: 0%;
+            background: var(--sig-orange);
+        }
+
+        .intro-cycle-text {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            letter-spacing: 0.05em;
+            margin-top: 1rem;
+            height: 15px;
+            opacity: 0;
+        }
+
+        .intro-shutter {
+            position: absolute;
+            left: 0; width: 100vw; height: 50vh;
+            background: var(--film-black);
+            z-index: 1;
+        }
+        .intro-shutter.top { top: 0; }
+        .intro-shutter.bottom { bottom: 0; }
+
+        .skip-intro {
+            position: absolute;
+            bottom: var(--gutter);
+            right: var(--gutter);
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--film-grey);
+            z-index: 3;
+            border-bottom: 1px solid transparent;
+            transition: border-color 0.3s ease;
+        }
+        .skip-intro:hover { border-color: var(--film-grey); }
+
+        /* ==========================================
+           NAVIGATION
+           ========================================== */
+        nav {
+            position: fixed;
+            top: 0; left: 0; width: 100%;
+            height: var(--nav-height);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 var(--gutter);
+            z-index: 9000;
+            color: var(--nav-color);
+            transition: color 0.5s ease;
+            mix-blend-mode: difference; /* Ensures visibility across bw/ivory */
+            color: var(--warm-ivory); /* Base color for mix-blend-mode */
+            pointer-events: none; /* Let clicks pass through empty space */
+        }
+
+        nav > * { pointer-events: auto; }
+
+        .nav-brand {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            letter-spacing: 0.05em;
+            font-weight: 500;
+        }
+
+        .nav-center {
+            display: none;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 300px;
+            align-items: center;
+        }
+
+        @media (min-width: 768px) {
+            .nav-center { display: flex; }
+        }
+
+        .nav-timeline-track {
+            width: 100%;
+            height: 1px;
+            background: rgba(255,255,255,0.2);
+            position: relative;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-timeline-progress {
+            position: absolute;
+            top: 0; left: 0;
+            height: 100%; width: 0%;
+            background: var(--sig-orange);
+            transform-origin: left;
+            will-change: width;
+        }
+
+        .nav-point {
+            width: 5px; height: 5px;
+            background: var(--warm-ivory);
+            border-radius: 50%;
+            position: relative;
+            z-index: 2;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.3s ease;
+        }
+
+        .nav-point:hover, .nav-point.active {
+            background: var(--sig-orange);
+            transform: scale(1.5);
+        }
+
+        .nav-point-label {
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: var(--font-mono);
+            font-size: 9px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        
+        .nav-point:hover .nav-point-label { opacity: 1; }
+
+        .nav-toggle {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            letter-spacing: 0.05em;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* Full Screen Index */
+        #scene-index {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: var(--deep-black);
+            color: var(--warm-ivory);
+            z-index: 8900;
+            padding: var(--nav-height) var(--gutter) var(--gutter) var(--gutter);
+            display: flex;
+            flex-direction: column;
+            clip-path: inset(0 0 100% 0);
+            transition: clip-path 0.8s var(--ease-cinematic);
+        }
+
+        #scene-index.is-open {
+            clip-path: inset(0 0 0% 0);
+        }
+
+        .index-list {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .index-item {
+            display: flex;
+            align-items: baseline;
+            gap: 2rem;
+            padding: 2vh 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .index-item::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0;
+            width: 100%; height: 1px;
+            background: var(--sig-orange);
+            transform: translateX(-101%);
+            transition: transform 0.5s var(--ease-cinematic);
+        }
+
+        .index-item:hover::after {
+            transform: translateX(0);
+        }
+
+        .index-num {
+            font-family: var(--font-mono);
+            font-size: clamp(12px, 1vw, 16px);
+            color: var(--film-grey);
+        }
+
+        .index-title {
+            font-size: clamp(2rem, 5vw, 4rem);
+            font-weight: 700;
+            transition: transform 0.5s var(--ease-cinematic), color 0.3s;
+        }
+
+        .index-item:hover .index-title {
+            transform: translateX(20px);
+        }
+
+        .index-timestamp {
+            margin-left: auto;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--sig-orange);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .index-item:hover .index-timestamp { opacity: 1; }
+
+        @media (max-width: 768px) {
+            .index-item { gap: 1rem; }
+            .index-item:hover .index-title { transform: none; }
+            .index-timestamp { display: none; }
+        }
+
+        /* ==========================================
+           SCENE STYLES (COMMON)
+           ========================================== */
+        section {
+            position: relative;
+            width: 100%;
+            padding: 10vh 0;
+        }
+
+        .scene-label {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .btn-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            border-bottom: 1px solid currentColor;
+            padding-bottom: 4px;
+            transition: gap 0.3s ease;
+        }
+        .btn-link:hover { gap: 15px; }
+        .btn-link .arrow { color: var(--sig-orange); }
+
+        /* ==========================================
+           SCENE 01: OPENING FRAME
+           ========================================== */
+        #s01 {
+            height: 100svh;
+            padding: var(--nav-height) var(--gutter) var(--gutter) var(--gutter);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow: hidden;
+        }
+
+        .s01-top {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .s01-meta-right { text-align: right; }
+
+        .s01-hero-text {
+            position: absolute;
+            top: 50%;
+            left: var(--gutter);
+            transform: translateY(-50%);
+            z-index: 10;
+            width: calc(100% - (var(--gutter) * 2));
+            pointer-events: none;
+        }
+
+        .s01-hero-text h1 {
+            font-size: clamp(3rem, 10vw, 12rem);
+            line-height: 0.85;
+            letter-spacing: -0.02em;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .s01-hero-text .serif-line {
+            font-size: clamp(3.5rem, 11vw, 13rem);
+            text-transform: none;
+            letter-spacing: normal;
+            margin-top: -2%;
+        }
+
+        .prod-mark {
+            display: inline-block;
+            width: 4px;
+            height: clamp(3rem, 10vw, 12rem);
+            background: var(--sig-orange);
+            margin-left: 2vw;
+            vertical-align: top;
+        }
+
+        /* Abstract Architectural Placeholder */
+        .s01-visual {
+            position: absolute;
+            top: 15vh;
+            right: 5vw;
+            width: 55vw;
+            height: 75vh;
+            background: #111;
+            z-index: 1;
+            /* Architectural Grid Pattern */
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(45deg, rgba(0,0,0,0.5) 25%, transparent 25%, transparent 75%, rgba(0,0,0,0.5) 75%, rgba(0,0,0,0.5)),
+                linear-gradient(-45deg, rgba(0,0,0,0.5) 25%, transparent 25%, transparent 75%, rgba(0,0,0,0.5) 75%, rgba(0,0,0,0.5));
+            background-size: 50px 50px, 50px 50px, 100px 100px, 100px 100px;
+            background-position: 0 0, 0 0, 0 0, 50px 50px;
+            filter: grayscale(100%);
+            box-shadow: inset 0 0 100px rgba(0,0,0,0.8);
+            border: 1px solid rgba(255,255,255,0.05);
+            transform-origin: center;
+        }
+
+        .s01-visual::after {
+            content: 'HERO_ARCHITECTURAL_VISUAL';
+            position: absolute;
+            bottom: 10px; right: 10px;
+            font-family: var(--font-mono);
+            font-size: 8px;
+            color: rgba(255,255,255,0.2);
+        }
+
+        .s01-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            position: relative;
+            z-index: 10;
+        }
+
+        .s01-name {
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: clamp(1rem, 1.5vw, 1.2rem);
+            line-height: 1.2;
+        }
+        
+        .s01-name span { color: var(--film-grey); font-weight: 500; display: block; font-size: 0.8em; }
+
+        .s01-scroll {
+            text-align: right;
+            font-family: var(--font-mono);
+            font-size: 10px;
+        }
+        .s01-scroll span { display: block; color: var(--sig-orange); margin-top: 5px; }
+
+        @media (max-width: 768px) {
+            .s01-visual { width: 90vw; right: 5vw; top: 25vh; height: 50vh; }
+            .s01-hero-text { top: 20%; transform: none; }
+            .prod-mark { width: 2px; }
+            .s01-meta-right { display: none; }
+        }
+
+        /* ==========================================
+           SCENE 02: PROFILE
+           ========================================== */
+        #s02 {
+            background-color: var(--warm-ivory);
+            color: var(--film-black);
+            padding: 15vh 0;
+            position: relative;
+        }
+
+        .s02-grid {
+            display: grid;
+            grid-template-columns: 55% 45%;
+            margin-top: 10vh;
+            gap: 4vw;
+        }
+
+        .s02-left { display: flex; flex-direction: column; justify-content: center; }
+        
+        .s02-name {
+            font-size: clamp(4rem, 12vw, 14rem);
+            font-weight: 800;
+            line-height: 0.8;
+            letter-spacing: -0.03em;
+            text-transform: uppercase;
+            margin-bottom: 4rem;
+        }
+
+        .s02-bio {
+            font-size: clamp(1.2rem, 2vw, 2rem);
+            line-height: 1.4;
+            max-width: 80%;
+            margin-bottom: 2rem;
+        }
+        .s02-bio p { margin-bottom: 1.5rem; }
+
+        .s02-statement {
+            font-size: clamp(2.5rem, 5vw, 5rem);
+            font-weight: 800;
+            line-height: 0.9;
+            text-transform: uppercase;
+            margin: 4rem 0;
+        }
+
+        .s02-right {
+            position: relative;
+            padding-right: 4vw;
+        }
+
+        .s02-img-wrapper {
+            position: relative;
+            aspect-ratio: 4/5;
+            background: var(--film-grey);
+            overflow: hidden;
+        }
+
+        /* Profile Placeholder */
+        .s02-img-wrapper::before {
+            content: '';
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 1px; height: 100%;
+            background: rgba(0,0,0,0.1);
+        }
+        .s02-img-wrapper::after {
+            content: '';
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%; height: 1px;
+            background: rgba(0,0,0,0.1);
+        }
+        .placeholder-label {
+            position: absolute;
+            bottom: 10px; right: 10px;
+            font-family: var(--font-mono);
+            font-size: 10px; color: var(--film-black);
+            z-index: 2;
+        }
+
+        /* Production Marks */
+        .s02-mark { position: absolute; width: 10px; height: 1px; background: var(--sig-orange); z-index: 2;}
+        .s02-mark.tl { top: -10px; left: -10px; width: 1px; height: 20px;}
+        .s02-mark.tl::after { content:''; position:absolute; top:0; left:0; width:20px; height:1px; background:var(--sig-orange);}
+        .s02-mark.tr { top: -10px; right: -10px; width: 1px; height: 20px;}
+        .s02-mark.tr::after { content:''; position:absolute; top:0; right:0; width:20px; height:1px; background:var(--sig-orange);}
+        .s02-mark.bl { bottom: -10px; left: -10px; width: 1px; height: 20px;}
+        .s02-mark.bl::after { content:''; position:absolute; bottom:0; left:0; width:20px; height:1px; background:var(--sig-orange);}
+        .s02-mark.br { bottom: -10px; right: -10px; width: 1px; height: 20px;}
+        .s02-mark.br::after { content:''; position:absolute; bottom:0; right:0; width:20px; height:1px; background:var(--sig-orange);}
+
+        .s02-meta {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            margin-top: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            color: var(--film-grey);
+        }
+
+        @media (max-width: 768px) {
+            .s02-grid { grid-template-columns: 1fr; gap: 4rem; }
+            .s02-bio { max-width: 100%; }
+            .s02-name { margin-bottom: 2rem; }
+            .s02-right { padding-right: 0; order: -1; margin-top: 2rem; } /* Image above bio on mobile */
+        }
+
+        /* ==========================================
+           SCENE 03: SELECTED WORK
+           ========================================== */
+        #s03 {
+            background-color: var(--film-black);
+            padding-top: 15vh;
+            padding-bottom: 10vh;
+        }
+
+        .s03-header {
+            margin-bottom: 15vh;
+        }
+
+        .s03-heading {
+            font-size: clamp(3rem, 7vw, 8rem);
+            line-height: 0.9;
+            text-transform: uppercase;
+            font-weight: 800;
+            margin-top: 2rem;
+        }
+
+        .project-frame {
+            margin-bottom: 25vh;
+            position: relative;
+        }
+
+        .p-grid {
+            display: grid;
+            grid-template-columns: 35% 65%; /* Data left, Image right based on constraint logic */
+            align-items: center;
+            gap: 4vw;
+        }
+
+        .p-meta-col {
+            display: flex;
+            flex-direction: column;
+            padding-right: 2vw;
+        }
+
+        .p-scene-num {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--sig-orange);
+            margin-bottom: 2rem;
+        }
+
+        .p-title {
+            font-size: clamp(2rem, 4vw, 4rem);
+            text-transform: uppercase;
+            font-weight: 800;
+            line-height: 1;
+            margin-bottom: 1.5rem;
+        }
+
+        .p-desc {
+            font-size: clamp(1rem, 1.2vw, 1.5rem);
+            color: var(--film-grey);
+            margin-bottom: 3rem;
+            line-height: 1.5;
+        }
+
+        .p-details {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 3rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 2rem;
+        }
+        
+        .p-details div span { display: block; color: var(--film-grey); margin-bottom: 5px; font-size: 9px; }
+
+        .p-actions { display: flex; gap: 2rem; }
+
+        .p-img-col {
+            position: relative;
+            overflow: hidden;
+            background: #111;
+        }
+
+        /* Huge background number */
+        .p-bg-num {
+            position: absolute;
+            top: 50%;
+            left: -10%;
+            transform: translateY(-50%);
+            font-size: 40vw;
+            font-weight: 800;
+            color: transparent;
+            -webkit-text-stroke: 1px rgba(255,255,255,0.03);
+            z-index: 0;
+            pointer-events: none;
+            line-height: 0.7;
+        }
+
+        .p-img-wrapper {
+            position: relative;
+            aspect-ratio: 16/9;
+            z-index: 2;
+            overflow: hidden;
+            /* Shutter logic via CSS/JS */
+            clip-path: inset(0 100% 0 0); 
+            transition: clip-path 1.5s var(--ease-cinematic);
+        }
+        .project-frame.is-revealed .p-img-wrapper { clip-path: inset(0 0 0 0); }
+
+        .p-img-inner {
+            width: 100%; height: 100%;
+            background-size: cover;
+            background-position: center;
+            filter: grayscale(100%);
+            transition: filter 0.5s ease, transform 0.8s var(--ease-cinematic);
+            /* Placeholders styling */
+            display: flex; align-items: center; justify-content: center;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        /* Abstract patterns for project placeholders */
+        .p-img-inner[data-bg="1"] { background: repeating-linear-gradient(90deg, #1a1a1a, #1a1a1a 10px, #111 10px, #111 20px); }
+        .p-img-inner[data-bg="2"] { background: radial-gradient(circle at center, #222 0, #0a0a0a 100%); }
+        .p-img-inner[data-bg="3"] { background: repeating-linear-gradient(45deg, #151515, #151515 20px, #0a0a0a 20px, #0a0a0a 40px); }
+
+        .p-img-wrapper:hover .p-img-inner {
+            filter: grayscale(0%);
+            transform: scale(1.02);
+        }
+
+        .p-view-frame {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--sig-orange);
+            color: var(--film-black);
+            padding: 10px 20px;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            z-index: 3;
+        }
+        .p-img-wrapper:hover .p-view-frame { opacity: 1; }
+
+        .p-timeline {
+            position: absolute;
+            bottom: -20px; right: 0;
+            width: 65%; height: 1px;
+            background: rgba(255,255,255,0.1);
+        }
+        .p-timeline::after {
+            content:''; position:absolute; left:0; top:0; height:100%; width:0%; background:var(--sig-orange);
+            transition: width 1s var(--ease-out);
+        }
+        .project-frame.is-revealed .p-timeline::after { width: 100%; }
+
+        @media (max-width: 1024px) {
+            .p-grid { grid-template-columns: 1fr; gap: 2rem; }
+            .p-img-col { order: -1; } /* Image first on mobile */
+            .p-timeline { width: 100%; }
+            .p-bg-num { left: 50%; transform: translate(-50%, -50%); font-size: 60vw; -webkit-text-stroke: 1px rgba(255,255,255,0.05); }
+        }
+
+        /* ==========================================
+           SCENE 04: EXPERIENCE
+           ========================================== */
+        #s04 {
+            background-color: var(--dark-stone);
+            padding: 15vh 0;
+        }
+
+        .s04-heading {
+            font-size: clamp(3rem, 7vw, 8rem);
+            line-height: 0.9;
+            text-transform: uppercase;
+            font-weight: 800;
+            margin-bottom: 10vh;
+        }
+
+        .exp-row {
+            display: flex;
+            border-top: 1px solid rgba(240, 237, 229, 0.1);
+            padding: 4rem 0;
+            gap: 4vw;
+            position: relative;
+        }
+        
+        .exp-row:last-child { border-bottom: 1px solid rgba(240, 237, 229, 0.1); }
+
+        .exp-year {
+            width: 20%;
+            font-family: var(--font-mono);
+            font-size: clamp(2rem, 4vw, 4rem);
+            font-weight: 400;
+        }
+
+        .exp-role {
+            width: 40%;
+            font-size: clamp(1.5rem, 2.5vw, 3rem);
+            font-weight: 700;
+            text-transform: uppercase;
+            line-height: 1.1;
+        }
+
+        .exp-data {
+            width: 40%;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .exp-company {
+            font-size: 1.2rem;
+            color: var(--film-grey);
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+
+        .exp-desc {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: var(--warm-ivory);
+            opacity: 0.8;
+        }
+
+        .exp-time {
+            position: absolute;
+            top: 10px; right: 0;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--sig-orange);
+        }
+
+        @media (max-width: 768px) {
+            .exp-row { flex-direction: column; gap: 1rem; padding: 3rem 0; }
+            .exp-year, .exp-role, .exp-data { width: 100%; }
+            .exp-year { font-size: 2rem; margin-bottom: 1rem; color: var(--sig-orange);}
+            .exp-time { position: relative; top: 0; margin-bottom: 1rem; }
+        }
+
+        /* ==========================================
+           SCENE 05: ENGINEERING INDEX
+           ========================================== */
+        #s05 {
+            background-color: var(--warm-ivory);
+            color: var(--film-black);
+            padding: 15vh 0;
+        }
+
+        .s05-heading {
+            font-size: clamp(3rem, 7vw, 8rem);
+            line-height: 0.9;
+            text-transform: uppercase;
+            font-weight: 800;
+            margin-bottom: 10vh;
+        }
+
+        .tech-list {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .tech-row {
+            display: flex;
+            align-items: baseline;
+            border-bottom: 1px solid rgba(8, 8, 8, 0.1);
+            padding: 2vw 0;
+            gap: 4vw;
+            position: relative;
+            cursor: pointer;
+        }
+
+        /* Group Hover Logic */
+        .tech-list:hover .tech-row { opacity: 0.3; }
+        .tech-list .tech-row:hover { opacity: 1; }
+
+        .tech-num {
+            width: 10%;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--film-grey);
+        }
+
+        .tech-cat {
+            width: 20%;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+
+        .tech-items {
+            width: 70%;
+            font-size: clamp(2rem, 4vw, 5rem);
+            font-weight: 800;
+            text-transform: uppercase;
+            line-height: 1;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2vw;
+            transition: color 0.3s;
+        }
+
+        .tech-row:hover .tech-items { color: var(--sig-orange); }
+
+        .tech-desc-box {
+            position: absolute;
+            right: 0; top: 50%;
+            transform: translateY(-50%);
+            background: var(--film-black);
+            color: var(--warm-ivory);
+            padding: 1rem;
+            width: 250px;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s, transform 0.3s;
+            z-index: 10;
+        }
+        
+        .tech-row:hover .tech-desc-box {
+            opacity: 1;
+            transform: translateY(-50%) translateX(-20px);
+        }
+
+        @media (max-width: 768px) {
+            .tech-row { flex-direction: column; gap: 0.5rem; padding: 2rem 0; }
+            .tech-num { display: none; }
+            .tech-cat { width: 100%; color: var(--sig-orange); }
+            .tech-items { width: 100%; font-size: 2.5rem; flex-direction: column; gap: 0; }
+            .tech-desc-box { position: relative; top: 0; transform: none; right: auto; width: 100%; margin-top: 1rem; }
+            .tech-row:hover .tech-desc-box { transform: none; }
+            .tech-list:hover .tech-row { opacity: 1; } /* Disable fade on mobile tap */
+        }
+
+        /* ==========================================
+           SCENE 06: PROBLEM SOLVING
+           ========================================== */
+        #s06 {
+            background-color: var(--film-black);
+            height: 100svh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative;
+        }
+
+        .counter-wrap {
+            font-family: var(--font-mono);
+            font-size: clamp(6rem, 15vw, 20rem);
+            font-weight: 400;
+            line-height: 1;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .counter-num { display: inline-block; }
+
+        .s06-text {
+            font-size: clamp(2rem, 5vw, 6rem);
+            font-weight: 800;
+            text-transform: uppercase;
+            line-height: 0.9;
+        }
+
+        .s06-platforms {
+            margin-top: 3rem;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--film-grey);
+            letter-spacing: 0.1em;
+        }
+        
+        .s06-tags {
+            position: absolute;
+            bottom: var(--gutter);
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 var(--gutter);
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--sig-orange);
+        }
+
+        /* ==========================================
+           SCENE 07: CERTIFICATE ARCHIVE
+           ========================================== */
+        #s07 {
+            background-color: var(--warm-ivory);
+            color: var(--film-black);
+            padding: 15vh 0;
+        }
+
+        .s07-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 10vh;
+        }
+
+        .s07-heading {
+            font-size: clamp(3rem, 7vw, 8rem);
+            line-height: 0.9;
+            text-transform: uppercase;
+            font-weight: 800;
+        }
+
+        .archive-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2vw;
+        }
+
+        .archive-item {
+            border: 1px solid var(--film-black);
+            padding: 1vw;
+            position: relative;
+        }
+
+        .arc-top {
+            display: flex;
+            justify-content: space-between;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            margin-bottom: 2vw;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            padding-bottom: 10px;
+        }
+
+        .arc-img-wrap {
+            aspect-ratio: 4/3;
+            background: var(--film-grey);
+            margin-bottom: 2vw;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .arc-img {
+            width: 100%; height: 100%;
+            background-size: cover;
+            background-position: center;
+            filter: grayscale(100%);
+            transition: transform 0.5s var(--ease-out), filter 0.5s;
+            /* Placeholder */
+            display: flex; align-items: center; justify-content: center;
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+        
+        .arc-img[data-cert="1"] { background: repeating-radial-gradient(circle at 0 0, transparent 0, rgba(0,0,0,0.05) 10px, transparent 10px, rgba(0,0,0,0.05) 20px); }
+        .arc-img[data-cert="2"] { background: linear-gradient(45deg, rgba(0,0,0,0.05) 25%, transparent 25%, transparent 75%, rgba(0,0,0,0.05) 75%, rgba(0,0,0,0.05)), linear-gradient(45deg, rgba(0,0,0,0.05) 25%, transparent 25%, transparent 75%, rgba(0,0,0,0.05) 75%, rgba(0,0,0,0.05)); background-size: 20px 20px; background-position: 0 0, 10px 10px; }
+        .arc-img[data-cert="3"] { background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.05) 2px, rgba(0,0,0,0.05) 4px); }
+
+
+        .archive-item:hover .arc-img {
+            transform: scale(1.02);
+            filter: grayscale(0%);
+        }
+
+        .arc-mark {
+            position: absolute;
+            top: 10px; right: 10px;
+            width: 10px; height: 10px;
+            background: var(--sig-orange);
+            border-radius: 50%;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .archive-item:hover .arc-mark { opacity: 1; }
+
+        .arc-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            line-height: 1.2;
+            margin-bottom: 0.5rem;
+        }
+
+        .arc-issuer {
+            font-size: 1rem;
+            color: var(--film-grey);
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .archive-grid { grid-template-columns: 1fr; gap: 4rem; }
+            .archive-item { padding: 4vw; }
+            .arc-img-wrap { margin-bottom: 1rem; }
+        }
+
+        /* ==========================================
+           SCENE 08: CONTACT
+           ========================================== */
+        #s08 {
+            background-color: var(--film-black);
+            padding: 20vh 0 10vh 0;
+            position: relative;
+        }
+
+        .s08-tiny {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-align: center;
+            letter-spacing: 0.2em;
+            color: var(--film-grey);
+            margin-bottom: 5vh;
+        }
+
+        .s08-heading {
+            font-size: clamp(3rem, 10vw, 10rem);
+            line-height: 0.85;
+            text-transform: uppercase;
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 5vh;
+        }
+
+        .s08-email-wrap {
+            text-align: center;
+            margin-bottom: 15vh;
+        }
+
+        .s08-email {
+            font-size: clamp(1.5rem, 3vw, 3rem);
+            font-family: var(--font-mono);
+            color: var(--warm-ivory);
+            transition: color 0.3s;
+        }
+        .s08-email:hover { color: var(--sig-orange); }
+
+        .contact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10vw;
+        }
+
+        .c-label {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--film-grey);
+            margin-bottom: 2rem;
+            text-transform: uppercase;
+        }
+
+        .c-links {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .c-link-item {
+            font-size: clamp(1.5rem, 2vw, 2rem);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: color 0.3s;
+        }
+        .c-link-item:hover { color: var(--sig-orange); }
+        .c-link-item span { font-family: var(--font-mono); font-size: 12px; }
+
+        .c-form {
+            display: flex;
+            flex-direction: column;
+            gap: 3rem;
+        }
+
+        .form-group {
+            position: relative;
+        }
+
+        .form-input {
+            width: 100%;
+            background: none;
+            border: none;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            padding: 10px 0;
+            color: var(--warm-ivory);
+            font-size: 1.2rem;
+            font-family: var(--font-sans);
+            outline: none;
+            transition: border-color 0.3s;
+            border-radius: 0;
+        }
+
+        .form-input:focus {
+            border-color: var(--sig-orange);
+        }
+
+        textarea.form-input {
+            resize: none;
+            height: 40px;
+        }
+
+        .form-label {
+            position: absolute;
+            top: 10px; left: 0;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--film-grey);
+            pointer-events: none;
+            transition: 0.3s ease all;
+        }
+
+        .form-input:focus ~ .form-label,
+        .form-input:valid ~ .form-label {
+            top: -15px;
+            font-size: 8px;
+            color: var(--sig-orange);
+        }
+
+        .btn-submit {
+            align-self: flex-start;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--warm-ivory);
+            border: 1px solid var(--warm-ivory);
+            padding: 15px 30px;
+            position: relative;
+            overflow: hidden;
+            display: flex; align-items: center; gap: 10px;
+        }
+        
+        .btn-submit::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: var(--sig-orange);
+            transform: translateX(-101%);
+            transition: transform 0.5s var(--ease-cinematic);
+            z-index: -1;
+        }
+
+        .btn-submit:hover { border-color: var(--sig-orange); }
+        .btn-submit:hover::before { transform: translateX(0); }
+
+        @media (max-width: 768px) {
+            .contact-grid { grid-template-columns: 1fr; gap: 4rem; }
+        }
+
+        /* ==========================================
+           FOOTER
+           ========================================== */
+        footer {
+            background-color: var(--film-black);
+            padding: 10vh 0 5vh 0;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .f-top {
+            text-align: center;
+            margin-bottom: 10vh;
+        }
+        .f-top span { display: block; font-family: var(--font-mono); font-size: 10px; color: var(--film-grey); margin-bottom: 10px;}
+        .f-top h2 { font-size: 2rem; font-weight: 700; letter-spacing: 2px;}
+
+        .f-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2vw;
+            margin-bottom: 10vh;
+        }
+
+        .f-col h4 {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--film-grey);
+            margin-bottom: 2rem;
+            text-transform: uppercase;
+        }
+
+        .f-col ul { display: flex; flex-direction: column; gap: 10px; }
+        
+        .f-col li, .f-col a {
+            font-size: 0.9rem;
+            color: var(--warm-ivory);
+            position: relative;
+            display: inline-block;
+            width: fit-content;
+        }
+
+        .f-col a::after {
+            content: '';
+            position: absolute;
+            bottom: -2px; left: 0; width: 0%; height: 1px;
+            background: var(--sig-orange);
+            transition: width 0.3s ease;
+        }
+        .f-col a:hover::after { width: 100%; }
+
+        .f-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--film-grey);
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .end-frame {
+            text-align: center;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: rgba(255,255,255,0.2);
+            margin-top: 5vh;
+            letter-spacing: 0.2em;
+        }
+
+        @media (max-width: 768px) {
+            .f-grid { grid-template-columns: 1fr; gap: 3rem; }
+            .f-bottom { flex-direction: column; align-items: flex-start; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Global Grain Overlay -->
+    <div id="grain"></div>
+
+    <!-- Intro Sequence -->
+    <div id="intro-sequence">
+        <div class="intro-shutter top"></div>
+        <div class="intro-shutter bottom"></div>
+        
+        <div class="intro-content">
+            <div class="intro-small" id="intro-line-1">A DIGITAL FILM BY</div>
+            <div class="intro-name" id="intro-name">KRISH GOYAL</div>
+            <div class="intro-role" id="intro-role">AI & ML ENGINEER</div>
+            
+            <div class="intro-meta" id="intro-meta">
+                <span>FRAME / 27</span>
+                <span>INDIA</span>
+                <span>2026</span>
+            </div>
+
+            <div class="intro-timeline-container" id="intro-tl-box">
+                <div class="intro-timeline-fill" id="intro-tl-fill"></div>
+            </div>
+            
+            <div class="intro-cycle-text" id="intro-cycle"></div>
+        </div>
+
+        <button class="skip-intro" id="btn-skip">SKIP INTRO</button>
+    </div>
+
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-brand">KG / FRAME 27</div>
+        <div class="nav-center">
+            <div class="nav-timeline-track">
+                <div class="nav-timeline-progress" id="nav-progress"></div>
+                <div class="nav-point" data-target="s01"><span class="nav-point-label">01 / OPENING</span></div>
+                <div class="nav-point" data-target="s02"><span class="nav-point-label">02 / PROFILE</span></div>
+                <div class="nav-point" data-target="s03"><span class="nav-point-label">03 / WORK</span></div>
+                <div class="nav-point" data-target="s04"><span class="nav-point-label">04 / EXP</span></div>
+                <div class="nav-point" data-target="s07"><span class="nav-point-label">05 / ARCHIVE</span></div>
+                <div class="nav-point" data-target="s08"><span class="nav-point-label">06 / CONTACT</span></div>
+            </div>
+        </div>
+        <button class="nav-toggle" id="menu-toggle">INDEX <span>+</span></button>
+    </nav>
+
+    <!-- Full Screen Index Menu -->
+    <div id="scene-index">
+        <div class="container index-list">
+            <div class="index-item nav-link" data-target="s01">
+                <span class="index-num">01</span>
+                <span class="index-title font-sans">OPENING</span>
+                <span class="index-timestamp">00:00:01</span>
+            </div>
+            <div class="index-item nav-link" data-target="s02">
+                <span class="index-num">02</span>
+                <span class="index-title font-sans">PROFILE</span>
+                <span class="index-timestamp">00:01:24</span>
+            </div>
+            <div class="index-item nav-link" data-target="s03">
+                <span class="index-num">03</span>
+                <span class="index-title font-sans">SELECTED WORK</span>
+                <span class="index-timestamp">00:05:42</span>
+            </div>
+            <div class="index-item nav-link" data-target="s04">
+                <span class="index-num">04</span>
+                <span class="index-title font-sans">EXPERIENCE</span>
+                <span class="index-timestamp">00:14:22</span>
+            </div>
+            <div class="index-item nav-link" data-target="s07">
+                <span class="index-num">05</span>
+                <span class="index-title font-sans">ARCHIVE</span>
+                <span class="index-timestamp">00:18:05</span>
+            </div>
+            <div class="index-item nav-link" data-target="s08">
+                <span class="index-num">06</span>
+                <span class="index-title font-sans">CONTACT</span>
+                <span class="index-timestamp">00:22:10</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main id="smooth-wrapper">
+        
+        <!-- SCENE 01: OPENING -->
+        <section id="s01" class="observe-section" data-theme="dark">
+            <div class="s01-top">
+                <div class="scene-label">SCENE 01<br>OPENING FRAME</div>
+                <div class="scene-label s01-meta-right">AI & ML ENGINEER<br>INDIA / 2026</div>
+            </div>
+
+            <div class="s01-hero-text">
+                <div class="mask-wrap"><span class="mask-inner"><h1>I BUILD</h1></span></div>
+                <div class="mask-wrap"><span class="mask-inner"><h1>WHAT PEOPLE <span class="prod-mark"></span></h1></span></div>
+                <div class="mask-wrap"><span class="mask-inner"><h1 class="serif-line font-serif italic">depend on.</h1></span></div>
+            </div>
+
+            <div class="s01-visual js-parallax" data-speed="0.08"></div>
+
+            <div class="s01-bottom">
+                <div class="s01-name">
+                    KRISH GOYAL
+                    <span>AI & ML ENGINEER</span>
+                </div>
+                <div class="s01-scroll">
+                    SCROLL
+                    <span id="hero-time">00:00:01</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- SCENE 02: PROFILE -->
+        <section id="s02" class="observe-section" data-theme="light">
+            <div class="container">
+                <div class="scene-label">SCENE 02 / SUBJECT</div>
+                
+                <div class="s02-grid">
+                    <div class="s02-left">
+                        <div class="s02-name mask-wrap"><span class="mask-inner">KRISH</span></div>
+                        <div class="s02-name mask-wrap"><span class="mask-inner">GOYAL.</span></div>
+                        
+                        <div class="s02-bio">
+                            <p class="fade-up">I'm Krish Goyal, a AI & ML Engineer focused on building reliable, production-ready digital systems.</p>
+                            <p class="fade-up">My work connects interfaces with backend architecture, APIs, authentication, databases, deployment, and scalable engineering workflows.</p>
+                        </div>
+                        
+                        <div class="s02-statement">
+                            <div class="mask-wrap"><span class="mask-inner">I CARE ABOUT</span></div>
+                            <div class="mask-wrap"><span class="mask-inner">WHAT HAPPENS</span></div>
+                            <div class="mask-wrap"><span class="mask-inner font-serif italic text-orange">after launch.</span></div>
+                        </div>
+
+                        <div class="fade-up">
+                            <button class="btn-link" onclick="alert('Resume download triggered.')">DOWNLOAD RESUME <span class="arrow">↘</span></button>
+                        </div>
+                    </div>
+                    
+                    <div class="s02-right">
+                        <div class="s02-img-wrapper js-parallax" data-speed="0.03">
+                            <div class="placeholder-label">KRISH_GOYAL_PROFILE_IMAGE</div>
+                            <div class="s02-mark tl"></div>
+                            <div class="s02-mark tr"></div>
+                            <div class="s02-mark bl"></div>
+                            <div class="s02-mark br"></div>
+                        </div>
+                        <div class="s02-meta fade-up">
+                            <span>SUBJECT / KG</span>
+                            <span>ROLE / AI & ML ENGINEER</span>
+                            <span>BASE / INDIA</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SCENE 03: WORK -->
+        <section id="s03" class="observe-section" data-theme="dark">
+            <div class="container">
+                <div class="s03-header">
+                    <div class="scene-label">SCENE 03 / SELECTED WORK</div>
+                    <div class="s03-heading">
+                        <div class="mask-wrap"><span class="mask-inner">THREE SYSTEMS.</span></div>
+                        <div class="mask-wrap"><span class="mask-inner">THREE PROBLEMS.</span></div>
+                        <div class="mask-wrap"><span class="mask-inner font-serif italic text-orange">built differently.</span></div>
+                    </div>
+                </div>
+
+                <!-- Project 01 -->
+                <div class="project-frame">
+                    <div class="p-grid">
+                        <div class="p-meta-col">
+                            <div class="p-scene-num fade-up">SCENE / 03.01</div>
+                            <h2 class="p-title mask-wrap"><span class="mask-inner">CODETEXA LMS</span></h2>
+                            <p class="p-desc fade-up">Learning Management System with role-specific dashboards and cloud media handling. Engineered for scale and seamless content delivery.</p>
+                            <div class="p-details fade-up">
+                                <div><span>TECH STACK</span> MERN, AWS, SOCKET.IO</div>
+                                <div><span>ROLE</span> AI & ML ENGINEER</div>
+                                <div><span>STATUS</span> SHIPPED</div>
+                            </div>
+                            <div class="p-actions fade-up">
+                                <a href="#" class="btn-link">LIVE DEMO <span class="arrow">↗</span></a>
+                                <a href="#" class="btn-link">VIEW CODE <span class="arrow">↗</span></a>
+                            </div>
+                        </div>
+                        <div class="p-img-col">
+                            <div class="p-bg-num">01</div>
+                            <div class="p-img-wrapper">
+                                <div class="p-img-inner js-parallax" data-bg="1" data-speed="0.05">
+                                    <span style="font-family:var(--font-mono);font-size:10px;color:rgba(255,255,255,0.5)">CODETEXA_PROJECT_IMAGE</span>
+                                </div>
+                                <div class="p-view-frame">VIEW FRAME ↗</div>
+                            </div>
+                            <div class="p-timeline"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Project 02 -->
+                <div class="project-frame">
+                    <div class="p-grid">
+                        <div class="p-meta-col">
+                            <div class="p-scene-num fade-up">SCENE / 03.02</div>
+                            <h2 class="p-title mask-wrap"><span class="mask-inner">DSPL TECHNOLOGY</span></h2>
+                            <p class="p-desc fade-up">Creative technology agency website focused on premium digital experiences, robust backend management, and high-performance frontend.</p>
+                            <div class="p-details fade-up">
+                                <div><span>TECH STACK</span> REACT, NODE, EXPRESS</div>
+                                <div><span>ROLE</span> FULL STACK INTERN</div>
+                                <div><span>STATUS</span> SHIPPED</div>
+                            </div>
+                            <div class="p-actions fade-up">
+                                <a href="#" class="btn-link">LIVE DEMO <span class="arrow">↗</span></a>
+                            </div>
+                        </div>
+                        <div class="p-img-col">
+                            <div class="p-bg-num">02</div>
+                            <div class="p-img-wrapper">
+                                <div class="p-img-inner js-parallax" data-bg="2" data-speed="0.05">
+                                     <span style="font-family:var(--font-mono);font-size:10px;color:rgba(255,255,255,0.5)">DSPL_PROJECT_IMAGE</span>
+                                </div>
+                                <div class="p-view-frame">VIEW FRAME ↗</div>
+                            </div>
+                            <div class="p-timeline"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Project 03 -->
+                <div class="project-frame">
+                    <div class="p-grid">
+                        <div class="p-meta-col">
+                            <div class="p-scene-num fade-up">SCENE / 03.03</div>
+                            <h2 class="p-title mask-wrap"><span class="mask-inner">AYODHYA ESTATES</span></h2>
+                            <p class="p-desc fade-up">Real estate platform with complex property listings, filtering algorithms, and virtual tour integrations for a modern buying experience.</p>
+                            <div class="p-details fade-up">
+                                <div><span>TECH STACK</span> NEXT.JS, TAILWIND, PRISMA</div>
+                                <div><span>ROLE</span> FRONTEND LEAD</div>
+                                <div><span>STATUS</span> IN DEVELOPMENT</div>
+                            </div>
+                            <div class="p-actions fade-up">
+                                <a href="#" class="btn-link">LINK / ADD URL <span class="arrow">↗</span></a>
+                            </div>
+                        </div>
+                        <div class="p-img-col">
+                            <div class="p-bg-num">03</div>
+                            <div class="p-img-wrapper">
+                                <div class="p-img-inner js-parallax" data-bg="3" data-speed="0.05">
+                                     <span style="font-family:var(--font-mono);font-size:10px;color:rgba(255,255,255,0.5)">AYODHYA_PROJECT_IMAGE</span>
+                                </div>
+                                <div class="p-view-frame">VIEW FRAME ↗</div>
+                            </div>
+                            <div class="p-timeline"></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- SCENE 04: EXPERIENCE -->
+        <section id="s04" class="observe-section" data-theme="dark">
+            <div class="container">
+                <div class="s04-heading">
+                    <div class="mask-wrap"><span class="mask-inner">THE WORK</span></div>
+                    <div class="mask-wrap"><span class="mask-inner">BEHIND</span></div>
+                    <div class="mask-wrap"><span class="mask-inner text-orange">THE WORK.</span></div>
+                </div>
+
+                <div class="exp-list">
+                    <div class="exp-row">
+                        <div class="exp-year fade-up">2026</div>
+                        <div class="exp-role mask-wrap"><span class="mask-inner">FREELANCE FULL STACK DEV</span></div>
+                        <div class="exp-data fade-up">
+                            <div class="exp-company">CODE TEZA LMS</div>
+                            <div class="exp-desc">Built and delivered a full-scale Learning Management System on the MERN stack, handling architecture, module planning, development, testing and production deployment.</div>
+                        </div>
+                        <div class="exp-time">00:14:22</div>
+                    </div>
+
+                    <div class="exp-row">
+                        <div class="exp-year fade-up">2025</div>
+                        <div class="exp-role mask-wrap"><span class="mask-inner">FULL STACK INTERN</span></div>
+                        <div class="exp-data fade-up">
+                            <div class="exp-company">DSPL TECHNOLOGIES</div>
+                            <div class="exp-desc">Worked on modernizing the company website into a structured MERN-based platform and improved frontend stability, responsive behavior and production quality.</div>
+                        </div>
+                        <div class="exp-time">00:08:41</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SCENE 05: ENGINEERING INDEX -->
+        <section id="s05" class="observe-section" data-theme="light">
+            <div class="container">
+                <div class="s05-heading">
+                    <div class="mask-wrap"><span class="mask-inner">TOOLS CHANGE.</span></div>
+                    <div class="mask-wrap"><span class="mask-inner font-serif italic text-orange">thinking stays.</span></div>
+                </div>
+
+                <div class="tech-list">
+                    <div class="tech-row">
+                        <div class="tech-num">01</div>
+                        <div class="tech-cat">LANGUAGE</div>
+                        <div class="tech-items">
+                            <span>JAVA</span><span class="text-orange">/</span><span>PYTHON</span><span class="text-orange">/</span><span>JAVASCRIPT</span>
+                        </div>
+                        <div class="tech-desc-box">CORE PROGRAMMING LOGIC & ALGORITHMS</div>
+                    </div>
+                    <div class="tech-row">
+                        <div class="tech-num">02</div>
+                        <div class="tech-cat">INTERFACE</div>
+                        <div class="tech-items">
+                            <span>HTML</span><span class="text-orange">/</span><span>CSS</span><span class="text-orange">/</span><span>REACT</span>
+                        </div>
+                        <div class="tech-desc-box">BUILDING ROBUST DOM STRUCTURES AND SPA</div>
+                    </div>
+                    <div class="tech-row">
+                        <div class="tech-num">03</div>
+                        <div class="tech-cat">SYSTEM</div>
+                        <div class="tech-items">
+                            <span>NODE.JS</span><span class="text-orange">/</span><span>EXPRESS</span><span class="text-orange">/</span><span>REST API</span>
+                        </div>
+                        <div class="tech-desc-box">SERVER-SIDE RUNTIME AND ENDPOINT ARCHITECTURE</div>
+                    </div>
+                    <div class="tech-row">
+                        <div class="tech-num">04</div>
+                        <div class="tech-cat">DATA</div>
+                        <div class="tech-items">
+                            <span>MONGODB</span><span class="text-orange">/</span><span>MYSQL</span>
+                        </div>
+                        <div class="tech-desc-box">NOSQL & RELATIONAL DATABASE MANAGEMENT</div>
+                    </div>
+                    <div class="tech-row">
+                        <div class="tech-num">05</div>
+                        <div class="tech-cat">WORKFLOW</div>
+                        <div class="tech-items">
+                            <span>GIT</span><span class="text-orange">/</span><span>GITHUB</span>
+                        </div>
+                        <div class="tech-desc-box">VERSION CONTROL AND TEAM COLLABORATION</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SCENE 06: PROBLEM SOLVING -->
+        <section id="s06" class="observe-section" data-theme="dark">
+            <div class="counter-wrap" id="counter-trigger">
+                <span class="counter-num" id="problem-counter">000</span><span style="color:var(--sig-orange)">+</span>
+            </div>
+            <div class="s06-text mask-wrap"><span class="mask-inner">PROBLEMS</span></div>
+            <div class="s06-text mask-wrap"><span class="mask-inner font-serif italic">SOLVED.</span></div>
+            <div class="s06-platforms fade-up">LEETCODE / GEEKSFORGEEKS / HACKERRANK</div>
+            <div class="s06-tags fade-up">
+                <span>LOGIC</span>
+                <span>CONSISTENCY</span>
+                <span>OPTIMIZATION</span>
+            </div>
+        </section>
+
+        <!-- SCENE 07: CERTIFICATES -->
+        <section id="s07" class="observe-section" data-theme="light">
+            <div class="container">
+                <div class="s07-header">
+                    <div class="s07-heading">
+                        <div class="mask-wrap"><span class="mask-inner">ARCHIVE /</span></div>
+                        <div class="mask-wrap"><span class="mask-inner font-serif italic text-orange">VERIFIED WORK.</span></div>
+                    </div>
+                </div>
+
+                <div class="archive-grid">
+                    <div class="archive-item fade-up" style="transition-delay: 0s;">
+                        <div class="arc-top"><span>A.001</span><span>DB</span></div>
+                        <div class="arc-img-wrap">
+                            <div class="arc-img" data-cert="1"><span style="font-family:var(--font-mono);font-size:10px;color:rgba(0,0,0,0.5)">CERTIFICATE_MYSQL_IMAGE</span></div>
+                            <div class="arc-mark"></div>
+                        </div>
+                        <div class="arc-title">Database Structures and Management with MySQL</div>
+                        <div class="arc-issuer">Meta / Coursera</div>
+                        <a href="#" class="btn-link">VERIFY <span class="arrow">↗</span></a>
+                    </div>
+
+                    <div class="archive-item fade-up" style="transition-delay: 0.1s;">
+                        <div class="arc-top"><span>A.002</span><span>WEB</span></div>
+                        <div class="arc-img-wrap">
+                            <div class="arc-img" data-cert="2"><span style="font-family:var(--font-mono);font-size:10px;color:rgba(0,0,0,0.5)">CERTIFICATE_WEB_IMAGE</span></div>
+                            <div class="arc-mark"></div>
+                        </div>
+                        <div class="arc-title">Responsive Web Design</div>
+                        <div class="arc-issuer">freeCodeCamp</div>
+                        <a href="#" class="btn-link">VERIFY <span class="arrow">↗</span></a>
+                    </div>
+
+                    <div class="archive-item fade-up" style="transition-delay: 0.2s;">
+                        <div class="arc-top"><span>A.003</span><span>DSA</span></div>
+                        <div class="arc-img-wrap">
+                            <div class="arc-img" data-cert="3"><span style="font-family:var(--font-mono);font-size:10px;color:rgba(0,0,0,0.5)">CERTIFICATE_DSA_IMAGE</span></div>
+                            <div class="arc-mark"></div>
+                        </div>
+                        <div class="arc-title">Data Structures and Algorithm</div>
+                        <div class="arc-issuer">LPU / iamneo</div>
+                        <a href="#" class="btn-link">VERIFY <span class="arrow">↗</span></a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SCENE 08: CONTACT -->
+        <section id="s08" class="observe-section" data-theme="dark">
+            <div class="s08-tiny">FINAL SCENE</div>
+            
+            <div class="s08-heading">
+                <div class="mask-wrap"><span class="mask-inner">LET'S BUILD</span></div>
+                <div class="mask-wrap"><span class="mask-inner">SOMETHING</span></div>
+                <div class="mask-wrap"><span class="mask-inner font-serif italic text-orange">worth shipping.</span></div>
+            </div>
+
+            <div class="s08-email-wrap fade-up">
+                <a href="mailto:krishgoyal.dev@gmail.com" class="s08-email">krishgoyal.dev@gmail.com</a>
+                <div style="margin-top: 1rem;"><button class="btn-link" onclick="navigator.clipboard.writeText('krishgoyal.dev@gmail.com'); alert('Email copied.')">COPY EMAIL <span class="arrow">↗</span></button></div>
+            </div>
+
+            <div class="container">
+                <div class="contact-grid">
+                    <div class="c-left">
+                        <div class="c-label fade-up">DIRECT CONTACT</div>
+                        <div class="c-links">
+                            <a href="tel:+919876543210" class="c-link-item fade-up"><span>PHONE</span> +91-9876543210</a>
+                            <a href="#" class="c-link-item fade-up"><span>GITHUB</span> @krishgoyal31 <span class="text-orange">↗</span></a>
+                            <a href="#" class="c-link-item fade-up"><span>LINKEDIN</span> /krishgoyal31 <span class="text-orange">↗</span></a>
+                            <a href="#" class="c-link-item fade-up"><span>INSTAGRAM</span> @krishgoyal31 <span class="text-orange">↗</span></a>
+                        </div>
+                    </div>
+                    <div class="c-right">
+                        <div class="c-label fade-up">START A CONVERSATION</div>
+                        <form class="c-form" onsubmit="event.preventDefault(); alert('Form logic to be connected.')">
+                            <div class="form-group fade-up">
+                                <input type="text" class="form-input" required id="f-name">
+                                <label for="f-name" class="form-label">NAME</label>
+                            </div>
+                            <div class="form-group fade-up">
+                                <input type="email" class="form-input" required id="f-email">
+                                <label for="f-email" class="form-label">EMAIL</label>
+                            </div>
+                            <div class="form-group fade-up">
+                                <input type="text" class="form-input" required id="f-proj">
+                                <label for="f-proj" class="form-label">PROJECT / OPPORTUNITY</label>
+                            </div>
+                            <div class="form-group fade-up">
+                                <textarea class="form-input" required id="f-msg"></textarea>
+                                <label for="f-msg" class="form-label">MESSAGE</label>
+                            </div>
+                            <button type="submit" class="btn-submit fade-up">SEND MESSAGE <span class="text-orange">↗</span></button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer>
+            <div class="container">
+                <div class="f-top fade-up">
+                    <span>A DIGITAL PORTFOLIO BY</span>
+                    <h2>KRISH GOYAL</h2>
+                </div>
+                
+                <div class="f-grid">
+                    <div class="f-col fade-up">
+                        <h4>ENGINEERING</h4>
+                        <ul>
+                            <li>FULL STACK DEVELOPMENT</li>
+                            <li>WEB SYSTEMS</li>
+                            <li>BACKEND ARCHITECTURE</li>
+                            <li>PRODUCTION DEPLOYMENT</li>
+                        </ul>
+                    </div>
+                    <div class="f-col fade-up" style="transition-delay: 0.1s;">
+                        <h4>DEV PROFILES</h4>
+                        <ul>
+                            <li><a href="#">GITHUB</a></li>
+                            <li><a href="#">LEETCODE</a></li>
+                            <li><a href="#">GEEKSFORGEEKS</a></li>
+                            <li><a href="#">HACKERRANK</a></li>
+                        </ul>
+                    </div>
+                    <div class="f-col fade-up" style="transition-delay: 0.2s;">
+                        <h4>CONTACT</h4>
+                        <ul>
+                            <li><a href="#">LINKEDIN</a></li>
+                            <li><a href="#">INSTAGRAM</a></li>
+                            <li><a href="#">FACEBOOK</a></li>
+                            <li><a href="mailto:krishgoyal.dev@gmail.com">EMAIL</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="f-bottom">
+                    <div>© 2026 KRISH GOYAL</div>
+                    <div>FRAME / 27</div>
+                    <div>AI & ML ENGINEER</div>
+                    <div>INDIA</div>
+                    <div>LOCAL TIME / <span id="live-time" class="text-orange">--:--:--</span></div>
+                </div>
+                
+                <div class="end-frame fade-up">END OF FRAME.</div>
+            </div>
+        </footer>
+
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // --- 1. INTRO SEQUENCE LOGIC ---
+            const introDiv = document.getElementById('intro-sequence');
+            const skipBtn = document.getElementById('btn-skip');
+            const hasPlayed = sessionStorage.getItem('frame27_intro');
+
+            if (hasPlayed) {
+                introDiv.style.display = 'none';
+                initScrollAnimations();
+            } else {
+                playIntro();
+            }
+
+            skipBtn.addEventListener('click', () => {
+                endIntro();
+            });
+
+            function playIntro() {
+                // Prevent scrolling during intro
+                document.body.style.overflow = 'hidden';
+                window.scrollTo(0,0);
+
+                const t1 = document.getElementById('intro-line-1');
+                const t2 = document.getElementById('intro-name');
+                const t3 = document.getElementById('intro-role');
+                const meta = document.getElementById('intro-meta');
+                const tlBox = document.getElementById('intro-tl-box');
+                const tlFill = document.getElementById('intro-tl-fill');
+                const cycle = document.getElementById('intro-cycle');
+                const shutters = document.querySelectorAll('.intro-shutter');
+
+                const words = ["ENGINEERING", "SYSTEMS", "INTERFACES", "SCALE", "BEGIN."];
+                
+                // CSS Transitions based timeline
+                setTimeout(() => { t1.style.opacity = 1; t1.style.transition = "opacity 1s"; }, 500);
+                setTimeout(() => { 
+                    t2.style.opacity = 1; t2.style.transition = "opacity 1s, transform 1s cubic-bezier(0.16, 1, 0.3, 1)";
+                    t2.style.transform = "translateY(0)"; 
+                    t2.style.transform = "translateY(10px)"; // Reset
+                    requestAnimationFrame(()=>{ t2.style.transform = "translateY(0)"; })
+                }, 1500);
+                setTimeout(() => { t3.style.opacity = 1; t3.style.transition = "opacity 1s"; }, 1800);
+                setTimeout(() => { meta.style.opacity = 1; meta.style.transition = "opacity 1s"; }, 2000);
+                setTimeout(() => { tlBox.style.opacity = 1; tlBox.style.transition = "opacity 0.5s"; }, 2500);
+
+                setTimeout(() => {
+                    cycle.style.opacity = 1;
+                    tlFill.style.transition = "width 1s linear";
+                    tlFill.style.width = "100%";
+                    
+                    let wIdx = 0;
+                    const cycleInt = setInterval(() => {
+                        cycle.innerText = words[wIdx];
+                        wIdx++;
+                        if (wIdx >= words.length) {
+                            clearInterval(cycleInt);
+                            setTimeout(endIntro, 800);
+                        }
+                    }, 200);
+                }, 2800);
+            }
+
+            function endIntro() {
+                const shutters = document.querySelectorAll('.intro-shutter');
+                const content = document.querySelector('.intro-content');
+                
+                content.style.opacity = 0;
+                content.style.transition = "opacity 0.5s";
+
+                setTimeout(() => {
+                    shutters[0].style.transition = "transform 1s cubic-bezier(0.76, 0, 0.24, 1)";
+                    shutters[1].style.transition = "transform 1s cubic-bezier(0.76, 0, 0.24, 1)";
+                    shutters[0].style.transform = "translateY(-100%)";
+                    shutters[1].style.transform = "translateY(100%)";
+                    
+                    setTimeout(() => {
+                        introDiv.style.display = 'none';
+                        document.body.style.overflow = '';
+                        sessionStorage.setItem('frame27_intro', 'true');
+                        initScrollAnimations();
+                    }, 1000);
+                }, 300);
+            }
+
+
+            // --- 2. SCROLL ANIMATIONS (Intersection Observer) ---
+            function initScrollAnimations() {
+                // Mask reveals
+                const maskElements = document.querySelectorAll('.mask-wrap, .project-frame');
+                // Fade up elements (simple opacity + transform)
+                const fadeElements = document.querySelectorAll('.fade-up');
+                
+                // Add base styles for fade-up dynamically so non-js fallback works
+                fadeElements.forEach(el => {
+                    el.style.opacity = '0';
+                    el.style.transform = 'translateY(20px)';
+                    el.style.transition = 'opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1)';
+                });
+
+                const observerOptions = { root: null, rootMargin: '0px 0px -10% 0px', threshold: 0.1 };
+
+                const observer = new IntersectionObserver((entries, obs) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            if (entry.target.classList.contains('mask-wrap') || entry.target.classList.contains('project-frame')) {
+                                entry.target.classList.add('is-revealed');
+                            }
+                            if (entry.target.classList.contains('fade-up')) {
+                                entry.target.style.opacity = '1';
+                                entry.target.style.transform = 'translateY(0)';
+                            }
+                            // Counter trigger
+                            if (entry.target.id === 'counter-trigger') {
+                                startCounter();
+                                obs.unobserve(entry.target);
+                            }
+                        }
+                    });
+                }, observerOptions);
+
+                maskElements.forEach(el => observer.observe(el));
+                fadeElements.forEach(el => observer.observe(el));
+                const counter = document.getElementById('counter-trigger');
+                if(counter) observer.observe(counter);
+
+                // Initial trigger for elements already in view
+                setTimeout(() => {
+                    document.getElementById('s01').querySelectorAll('.mask-wrap').forEach(el => el.classList.add('is-revealed'));
+                }, 100);
+            }
+
+            // --- 3. PROBLEM SOLVING COUNTER ---
+            function startCounter() {
+                const el = document.getElementById('problem-counter');
+                let count = 0;
+                const target = 200;
+                const duration = 1500; // ms
+                const interval = 30; // ms
+                const increment = target / (duration / interval);
+                
+                const timer = setInterval(() => {
+                    count += increment;
+                    // Add random noise for film feel
+                    let displayNum = Math.floor(count + (Math.random() * 5 - 2)); 
+                    if (count >= target) {
+                        displayNum = target;
+                        clearInterval(timer);
+                    }
+                    el.innerText = String(Math.max(0, displayNum)).padStart(3, '0');
+                }, interval);
+            }
+
+            // --- 4. NAVIGATION LOGIC & SCROLL SPY ---
+            const sections = document.querySelectorAll('.observe-section');
+            const navPoints = document.querySelectorAll('.nav-point');
+            const navProgress = document.getElementById('nav-progress');
+            
+            // Section visibility observer for Nav Highlighting & Nav Color (Theme)
+            const sectionObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        // Update active dot
+                        const id = entry.target.getAttribute('id');
+                        navPoints.forEach(p => {
+                            p.classList.toggle('active', p.getAttribute('data-target') === id);
+                        });
+                        
+                        // Though using mix-blend-mode difference, keeping a state class on body can be useful
+                        document.body.setAttribute('data-current-theme', entry.target.getAttribute('data-theme'));
+                    }
+                });
+            }, { threshold: 0.5 }); // Trigger when 50% visible
+
+            sections.forEach(sec => sectionObserver.observe(sec));
+
+            // Scroll Progress Timeline & Parallax
+            let lastScrollY = window.scrollY;
+            let ticking = false;
+
+            window.addEventListener('scroll', () => {
+                lastScrollY = window.scrollY;
+                if (!ticking) {
+                    window.requestAnimationFrame(() => {
+                        updateOnScroll(lastScrollY);
+                        ticking = false;
+                    });
+                    ticking = true;
+                }
+            }, { passive: true });
+
+            const parallaxElements = document.querySelectorAll('.js-parallax');
+
+            function updateOnScroll(scrollY) {
+                // Nav Progress
+                const docHeight = document.body.scrollHeight - window.innerHeight;
+                const progress = (scrollY / docHeight) * 100;
+                navProgress.style.width = `${progress}%`;
+
+                // Parallax
+                parallaxElements.forEach(el => {
+                    const speed = el.getAttribute('data-speed');
+                    const yPos = -(scrollY * speed);
+                    el.style.transform = `translateY(${yPos}px)`;
+                });
+
+                // Hero timestamp update (fake visual)
+                const heroTime = document.getElementById('hero-time');
+                if (scrollY < window.innerHeight) {
+                    const ms = Math.floor(scrollY % 1000).toString().padStart(3, '0');
+                    const s = Math.floor(scrollY / 100).toString().padStart(2, '0');
+                    heroTime.innerText = `00:00:${s}:${ms.substring(0,2)}`;
+                }
+            }
+
+            // Smooth Scroll Links
+            document.querySelectorAll('.nav-point, .nav-link').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    const targetId = link.getAttribute('data-target');
+                    const targetSection = document.getElementById(targetId);
+                    if (targetSection) {
+                        // Close menu if open
+                        const indexMenu = document.getElementById('scene-index');
+                        if (indexMenu.classList.contains('is-open')) {
+                            indexMenu.classList.remove('is-open');
+                            document.getElementById('menu-toggle').innerHTML = 'INDEX <span>+</span>';
+                            document.body.style.overflow = '';
+                        }
+
+                        // Custom smooth scroll
+                        const y = targetSection.getBoundingClientRect().top + window.scrollY;
+                        window.scrollTo({ top: y, behavior: 'smooth' });
+                    }
+                });
+            });
+
+            // --- 5. FULL SCREEN MENU ---
+            const menuToggle = document.getElementById('menu-toggle');
+            const sceneIndex = document.getElementById('scene-index');
+
+            menuToggle.addEventListener('click', () => {
+                const isOpen = sceneIndex.classList.toggle('is-open');
+                if (isOpen) {
+                    menuToggle.innerHTML = 'CLOSE <span>×</span>';
+                    document.body.style.overflow = 'hidden';
+                } else {
+                    menuToggle.innerHTML = 'INDEX <span>+</span>';
+                    document.body.style.overflow = '';
+                }
+            });
+
+            // --- 6. LIVE TIME (INDIA) ---
+            const timeEl = document.getElementById('live-time');
+            setInterval(() => {
+                const options = { timeZone: 'Asia/Kolkata', hour12: false, hour: '2-digit', minute:'2-digit', second:'2-digit' };
+                const timeString = new Date().toLocaleTimeString('en-US', options);
+                timeEl.innerText = timeString + " IST";
+            }, 1000);
+
+            // Initial manual call for elements that might be missed on fast load
+            if(hasPlayed) initScrollAnimations();
+
+        });
+    </script>
+</body>
+</html>
