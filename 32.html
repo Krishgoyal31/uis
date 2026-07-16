@@ -1,0 +1,1991 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Krish Goyal | CTRL + CURIOSITY</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;1,400&family=Instrument+Serif:ital@0;1&family=Manrope:wght@300;400;500;600;700&family=Caveat:wght@500&display=swap" rel="stylesheet">
+
+    <style>
+        /* ==========================================================================
+           VARIABLES & RESET
+           ========================================================================== */
+        :root {
+            /* Color System */
+            --paper: #F2F0E9;
+            --ink: #111111;
+            --soft: #66645F;
+            --note: #D8D5CD;
+            --blue: #2457FF;
+            --orange: #FF5C35;
+
+            /* Typography */
+            --font-sans: 'Manrope', sans-serif;
+            --font-serif: 'Instrument Serif', serif;
+            --font-mono: 'IBM Plex Mono', monospace;
+            --font-hand: 'Caveat', cursive; /* For tiny annotations only */
+
+            /* Spacing & Layout */
+            --gutter: clamp(20px, 4vw, 60px);
+            --section-pad: clamp(80px, 12vw, 180px);
+
+            /* Easings */
+            --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+            --ease-in-out: cubic-bezier(0.76, 0, 0.24, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: auto; /* Handled by JS for smoothness if needed, but native is fine */
+            background-color: var(--paper);
+            color: var(--ink);
+            font-family: var(--font-sans);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body {
+            overflow-x: hidden;
+            width: 100%;
+            cursor: none; /* Hide default cursor on desktop */
+        }
+
+        /* Disable custom cursor on mobile/touch */
+        @media (hover: none) and (pointer: coarse) {
+            body { cursor: auto; }
+            #custom-cursor, #cursor-follower { display: none !important; }
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+            cursor: none; /* Let custom cursor handle it */
+        }
+
+        button {
+            background: none;
+            border: none;
+            font-family: inherit;
+            color: inherit;
+            cursor: none;
+        }
+
+        ul { list-style: none; }
+
+        ::selection {
+            background-color: var(--blue);
+            color: var(--paper);
+        }
+
+        /* ==========================================================================
+           TYPOGRAPHY UTILITIES
+           ========================================================================== */
+        .font-sans { font-family: var(--font-sans); }
+        .font-serif { font-family: var(--font-serif); font-weight: 400; }
+        .font-mono { font-family: var(--font-mono); font-size: 0.85em; text-transform: uppercase; letter-spacing: 0.05em; }
+        .font-hand { font-family: var(--font-hand); color: var(--orange); font-size: clamp(1.2rem, 1.5vw, 1.5rem); transform: rotate(-3deg); }
+
+        .text-huge {
+            font-size: clamp(3.5rem, 10vw, 10rem);
+            line-height: 0.9;
+            letter-spacing: -0.02em;
+            text-transform: uppercase;
+        }
+
+        .text-large { font-size: clamp(2rem, 5vw, 4rem); line-height: 1.1; }
+        .text-body { font-size: clamp(1rem, 1.2vw, 1.2rem); line-height: 1.6; }
+        .text-small { font-size: clamp(0.75rem, 0.9vw, 0.9rem); line-height: 1.4; color: var(--soft); }
+
+        .italic { font-style: italic; text-transform: none; }
+        .color-blue { color: var(--blue); }
+        .color-orange { color: var(--orange); }
+        .color-soft { color: var(--soft); }
+
+        /* ==========================================================================
+           CUSTOM CURSOR
+           ========================================================================== */
+        #custom-cursor {
+            position: fixed;
+            top: 0; left: 0;
+            width: 8px; height: 8px;
+            background-color: var(--ink);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 10000;
+            transform: translate(-50%, -50%);
+            transition: width 0.3s var(--ease-out), height 0.3s var(--ease-out), background-color 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--paper);
+            opacity: 0; /* Hidden initially until mouse moves */
+        }
+
+        #cursor-follower {
+            position: fixed;
+            top: 0; left: 0;
+            width: 40px; height: 40px;
+            border: 1px solid var(--blue);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            transition: transform 0.15s ease-out, width 0.3s var(--ease-out), height 0.3s var(--ease-out), opacity 0.3s;
+            opacity: 0;
+        }
+
+        /* Cursor States */
+        body.cursor-active #custom-cursor, body.cursor-active #cursor-follower { opacity: 1; }
+
+        #custom-cursor.state-question { width: 40px; height: 40px; background-color: var(--orange); }
+        #custom-cursor.state-question::after { content: '?'; }
+
+        #custom-cursor.state-project { width: 80px; height: 80px; background-color: var(--blue); border-radius: 100px; }
+        #custom-cursor.state-project::after { content: 'BUILD ↗'; }
+
+        #custom-cursor.state-skill { width: 80px; height: 80px; background-color: var(--ink); border-radius: 100px; }
+        #custom-cursor.state-skill::after { content: 'LEARNED'; }
+
+        #custom-cursor.state-experiment { width: 60px; height: 60px; background-color: var(--orange); border-radius: 100px; }
+        #custom-cursor.state-experiment::after { content: 'WHY?'; }
+
+        #custom-cursor.state-link { width: 60px; height: 60px; background-color: var(--ink); border-radius: 100px;}
+        #custom-cursor.state-link::after { content: 'OPEN ↗'; }
+
+        /* Hide follower when main cursor expands */
+        #custom-cursor[class*="state-"] + #cursor-follower { opacity: 0; }
+
+        /* ==========================================================================
+           INTRO SEQUENCE
+           ========================================================================== */
+        #intro-overlay {
+            position: fixed;
+            inset: 0;
+            background-color: var(--paper);
+            z-index: 9000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-mono);
+            font-size: clamp(1rem, 2vw, 2rem);
+        }
+
+        #intro-text-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        #intro-text {
+            border-right: 2px solid var(--ink);
+            padding-right: 5px;
+            animation: blinkCursor 0.8s infinite;
+            white-space: pre-wrap;
+        }
+
+        @keyframes blinkCursor {
+            0%, 100% { border-color: transparent; }
+            50% { border-color: var(--ink); }
+        }
+
+        #intro-circle {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 120%; height: 150%;
+            border: 2px solid var(--orange);
+            border-radius: 50%;
+            opacity: 0;
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            pointer-events: none;
+        }
+
+        .draw-circle {
+            animation: drawCircle 0.5s var(--ease-out) forwards;
+            opacity: 1 !important;
+        }
+
+        @keyframes drawCircle {
+            to { stroke-dashoffset: 0; }
+        }
+
+        #intro-details {
+            position: absolute;
+            bottom: var(--gutter);
+            text-align: center;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.8s var(--ease-out);
+        }
+
+        #intro-details p { margin: 5px 0; }
+
+        #intro-line {
+            position: absolute;
+            top: 50%; left: 0;
+            width: 0%; height: 1px;
+            background-color: var(--blue);
+            z-index: 9001;
+        }
+
+        .skip-btn {
+            position: absolute;
+            bottom: var(--gutter);
+            right: var(--gutter);
+            font-size: 10px;
+            color: var(--soft);
+            z-index: 9002;
+            padding: 10px;
+        }
+
+        /* ==========================================================================
+           NAVIGATION & INDEX
+           ========================================================================== */
+        nav {
+            position: fixed;
+            top: 0; left: 0; width: 100%;
+            padding: var(--gutter);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            z-index: 1000;
+            mix-blend-mode: difference;
+            color: #fff; /* White to invert against paper (#F2F0E9) making it dark gray/black */
+            pointer-events: none; /* Let clicks pass through empty space */
+        }
+
+        nav > * { pointer-events: auto; }
+
+        .nav-left, .nav-center, .nav-right {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+
+        .nav-center {
+            display: flex;
+            gap: 10px;
+            color: var(--soft); /* Will invert to something slightly different */
+        }
+        .nav-center span:last-child { color: #fff; } /* The actual thought */
+
+        .nav-right button {
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        #index-overlay {
+            position: fixed;
+            inset: 0;
+            background-color: var(--paper);
+            z-index: 8000;
+            padding: var(--section-pad) var(--gutter);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            transform: translateY(-100%);
+            transition: transform 0.8s var(--ease-in-out);
+        }
+
+        #index-overlay.active {
+            transform: translateY(0);
+        }
+
+        .index-list {
+            display: flex;
+            flex-direction: column;
+            gap: clamp(10px, 2vw, 20px);
+        }
+
+        .index-item {
+            font-size: clamp(2rem, 5vw, 4rem);
+            font-family: var(--font-sans);
+            font-weight: 600;
+            text-transform: uppercase;
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            gap: 20px;
+            width: fit-content;
+            color: var(--ink);
+            transition: color 0.3s;
+        }
+
+        .index-item:hover { color: var(--blue); }
+        .index-item .num { font-family: var(--font-mono); font-size: 0.3em; font-weight: 400; color: var(--soft); margin-bottom: auto; margin-top: 10px; }
+
+        .index-anno {
+            position: absolute;
+            right: -100px;
+            top: 50%;
+            transform: translateY(-50%) rotate(5deg);
+            opacity: 0;
+            transition: opacity 0.3s;
+            white-space: nowrap;
+        }
+
+        .index-item:hover .index-anno { opacity: 1; }
+
+        @media (max-width: 768px) {
+            .nav-center { display: none; }
+            .nav-left .full-name { display: none; }
+            .nav-left::before { content: 'SM.'; }
+        }
+
+        /* ==========================================================================
+           LAYOUT UTILITIES & ANIMATIONS
+           ========================================================================== */
+        main { position: relative; z-index: 1; }
+
+        section {
+            padding: var(--section-pad) var(--gutter);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* Reveal Animations */
+        .reveal-wrap { overflow: hidden; display: inline-block; vertical-align: top; }
+        .reveal-text {
+            display: inline-block;
+            transform: translateY(110%);
+            transition: transform 1s var(--ease-out);
+        }
+        .is-visible .reveal-text { transform: translateY(0); }
+
+        .fade-in { opacity: 0; transform: translateY(30px); transition: all 1s var(--ease-out); }
+        .is-visible.fade-in, .is-visible .fade-in { opacity: 1; transform: translateY(0); }
+
+        .draw-line {
+            width: 0; height: 1px; background-color: var(--note);
+            transition: width 1.5s var(--ease-out);
+        }
+        .is-visible .draw-line { width: 100%; }
+
+        /* ==========================================================================
+           SECTION 01: CURIOSITY (HERO)
+           ========================================================================== */
+        #curiosity {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            overflow: hidden; /* For floating questions */
+        }
+
+        .hero-title {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .hero-title .why {
+            font-family: var(--font-serif);
+            font-style: italic;
+            text-transform: lowercase;
+            color: var(--blue);
+            margin-top: -0.2em;
+        }
+
+        .floating-questions {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .fq {
+            position: absolute;
+            white-space: nowrap;
+            opacity: 0.6;
+            transition: transform 0.1s linear; /* Smooth JS follow */
+        }
+
+        .fq-1 { top: 15%; left: 10%; font-family: var(--font-mono); font-size: 14px; transform: rotate(-2deg); }
+        .fq-2 { top: 20%; right: 15%; font-family: var(--font-sans); font-size: 18px; transform: rotate(1deg); }
+        .fq-3 { top: 50%; left: 5%; font-family: var(--font-serif); font-style: italic; font-size: 24px; color: var(--orange); }
+        .fq-4 { bottom: 25%; right: 10%; font-family: var(--font-mono); font-size: 12px; transform: rotate(-1deg); }
+        .fq-5 { bottom: 15%; left: 20%; font-family: var(--font-sans); font-size: 16px; }
+        .fq-6 { top: 60%; right: 5%; font-family: var(--font-serif); font-size: 20px; transform: rotate(2deg); }
+
+        .hero-footer {
+            position: absolute;
+            bottom: var(--gutter);
+            left: var(--gutter);
+            right: var(--gutter);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            text-align: left;
+            z-index: 2;
+        }
+
+        .hero-scroll { text-align: right; }
+
+        @media (max-width: 768px) {
+            .fq { display: none; } /* Too messy on mobile */
+            .hero-footer { flex-direction: column; gap: 20px; align-items: flex-start; text-align: left; }
+            .hero-scroll { text-align: left; }
+        }
+
+        /* ==========================================================================
+           SECTION 02: ABOUT
+           ========================================================================== */
+        .about-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10vw;
+            margin-top: 10vh;
+            align-items: start;
+        }
+
+        .about-content {
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+        }
+
+        .about-bio p {
+            margin-bottom: 20px;
+        }
+
+        .about-statement {
+            margin-top: 40px;
+            padding-top: 40px;
+            border-top: 1px solid var(--note);
+        }
+
+        .notebook-frame-wrapper {
+            position: relative;
+            padding: 20px;
+            width: 100%;
+            max-width: 500px;
+            aspect-ratio: 4/5;
+            margin: 0 auto;
+        }
+
+        /* 4 disconnected blue corners */
+        .notebook-frame-wrapper::before, .notebook-frame-wrapper::after,
+        .notebook-frame-inner::before, .notebook-frame-inner::after {
+            content: ''; position: absolute; width: 30px; height: 30px; border: 2px solid var(--blue);
+            transition: all 1s var(--ease-out); opacity: 0;
+        }
+
+        .is-visible .notebook-frame-wrapper::before, .is-visible .notebook-frame-wrapper::after,
+        .is-visible .notebook-frame-inner::before, .is-visible .notebook-frame-inner::after { opacity: 1; }
+
+        .notebook-frame-wrapper::before { top: 0; left: 0; border-right: none; border-bottom: none; transform: translate(-10px, -10px); }
+        .notebook-frame-wrapper::after { top: 0; right: 0; border-left: none; border-bottom: none; transform: translate(10px, -10px); }
+        .notebook-frame-inner::before { bottom: 0; left: 0; border-right: none; border-top: none; transform: translate(-10px, 10px); }
+        .notebook-frame-inner::after { bottom: 0; right: 0; border-left: none; border-top: none; transform: translate(10px, 10px); }
+
+        .is-visible .notebook-frame-wrapper::before { transform: translate(0, 0); }
+        .is-visible .notebook-frame-wrapper::after { transform: translate(0, 0); }
+        .is-visible .notebook-frame-inner::before { transform: translate(0, 0); }
+        .is-visible .notebook-frame-inner::after { transform: translate(0, 0); }
+
+
+        .notebook-frame-inner {
+            position: relative;
+            width: 100%; height: 100%;
+            background-color: var(--note); /* Placeholder color */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .img-placeholder-text {
+            font-family: var(--font-mono);
+            color: var(--soft);
+            font-size: 14px;
+            transform: rotate(-90deg);
+        }
+
+        .about-anno {
+            position: absolute;
+            top: 10%; right: -80px;
+            display: flex; align-items: center; gap: 10px;
+        }
+
+        .about-meta { margin-top: 20px; display: flex; flex-direction: column; gap: 5px; }
+
+        @media (max-width: 900px) {
+            .about-grid { grid-template-columns: 1fr; gap: 60px; }
+            .notebook-frame-wrapper { order: -1; margin: 0; }
+            .about-anno { right: auto; left: 10px; top: -30px; }
+        }
+
+        /* ==========================================================================
+           SECTION 03: LEARNING WALL
+           ========================================================================== */
+        .learning-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 80px; border-bottom: 1px solid var(--note); padding-bottom: 20px;}
+
+        .learning-wall-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            position: relative;
+            /* Using flex instead of grid for a more scattered "wall" feel */
+            justify-content: center;
+            padding: 40px 0;
+        }
+
+        .learning-node {
+            padding: 15px 30px;
+            border: 1px solid var(--note);
+            border-radius: 4px;
+            font-family: var(--font-mono);
+            font-size: clamp(1rem, 1.5vw, 1.2rem);
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: var(--paper);
+            z-index: 2;
+        }
+
+        .learning-node-status {
+            position: absolute;
+            top: -10px; left: 10px;
+            background: var(--paper);
+            padding: 0 5px;
+            font-size: 10px;
+            color: var(--orange);
+            opacity: 0;
+            transform: translateY(5px);
+            transition: all 0.3s;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+
+        /* Hover Interactions */
+        .learning-wall-grid.is-hovering .learning-node { opacity: 0.2; border-color: transparent; }
+
+        .learning-wall-grid.is-hovering .learning-node.active,
+        .learning-wall-grid.is-hovering .learning-node.related {
+            opacity: 1;
+            border-color: var(--blue);
+            color: var(--blue);
+        }
+
+        .learning-node:hover .learning-node-status,
+        .learning-node.active .learning-node-status {
+            opacity: 1; transform: translateY(0);
+        }
+
+        /* Mobile specific learning wall */
+        .mobile-learning-details {
+            display: none;
+            width: 100%;
+            margin-top: 10px;
+            padding: 15px;
+            background: rgba(36, 87, 255, 0.05);
+            border-left: 2px solid var(--blue);
+            font-family: var(--font-sans);
+            font-size: 0.9rem;
+            color: var(--ink);
+            text-transform: none;
+            text-align: left;
+        }
+
+        @media (max-width: 768px) {
+            .learning-wall-grid { flex-direction: column; align-items: stretch; }
+            .learning-node { text-align: left; }
+            .learning-node-status { position: static; opacity: 1; transform: none; display: block; margin-bottom: 5px; font-size: 12px;}
+            .learning-wall-grid.is-hovering .learning-node { opacity: 1; border-color: var(--note); color: var(--ink); } /* Disable complex hover on mobile */
+            .learning-node.mobile-open { border-color: var(--blue); color: var(--blue); }
+            .learning-node.mobile-open .mobile-learning-details { display: block; }
+        }
+
+        /* ==========================================================================
+           SECTION 04: BUILT (PROJECTS)
+           ========================================================================== */
+        .build-intro-anno { position: absolute; transform: rotate(-5deg); margin-left: 20px; margin-top: -20px; }
+
+        .project-story {
+            margin-top: 15vh;
+            border-top: 1px solid var(--note);
+            padding-top: 80px;
+        }
+
+        .project-meta-head {
+            display: flex;
+            justify-content: space-between;
+            font-family: var(--font-mono);
+            margin-bottom: 40px;
+            color: var(--soft);
+        }
+
+        .project-question {
+            font-family: var(--font-serif);
+            font-size: clamp(2.5rem, 6vw, 5rem);
+            line-height: 1;
+            font-style: italic;
+            margin-bottom: 60px;
+            max-width: 90%;
+        }
+
+        .project-image-wrap {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background-color: var(--note);
+            margin-bottom: 60px;
+            position: relative;
+            overflow: hidden;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        /* Reveal curtain for image */
+        .project-image-wrap::after {
+            content: ''; position: absolute; inset: 0; background-color: var(--paper);
+            transform-origin: top; transition: transform 1.2s var(--ease-in-out);
+        }
+        .is-visible .project-image-wrap::after { transform: scaleY(0); }
+
+        .project-details-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 40px;
+            margin-bottom: 60px;
+        }
+
+        .pd-block h4 {
+            font-family: var(--font-mono); font-size: 12px; color: var(--soft); margin-bottom: 15px;
+        }
+
+        .pd-learned {
+            grid-column: 1 / -1;
+            font-family: var(--font-serif);
+            font-size: clamp(1.5rem, 3vw, 2.5rem);
+            color: var(--blue);
+            margin-top: 20px;
+            padding-left: 20px;
+            border-left: 2px solid var(--blue);
+        }
+
+        .project-links { display: flex; gap: 30px; font-family: var(--font-mono); font-size: 14px;}
+        .project-links a { border-bottom: 1px solid var(--ink); padding-bottom: 2px; transition: color 0.3s, border-color 0.3s;}
+        .project-links a:hover { color: var(--blue); border-color: var(--blue); }
+
+        @media (max-width: 1024px) {
+            .project-details-grid { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 768px) {
+            .project-details-grid { grid-template-columns: 1fr; gap: 30px; }
+            .project-image-wrap { aspect-ratio: 4/3; }
+        }
+
+        /* ==========================================================================
+           SECTION 05: BROKE (DEBUG JOURNAL)
+           ========================================================================== */
+        .debug-journal {
+            margin-top: 80px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .bug-entry {
+            display: grid;
+            grid-template-columns: 100px 1fr 1fr;
+            gap: 40px;
+            padding: 40px 0;
+            border-bottom: 1px solid var(--note);
+            position: relative;
+            cursor: pointer;
+        }
+
+        .bug-id { font-family: var(--font-mono); color: var(--orange); }
+
+        .bug-statement {
+            font-size: clamp(1.2rem, 2vw, 1.8rem);
+            transition: all 0.3s;
+            position: relative;
+            display: inline-block;
+        }
+
+        /* The cross-out line */
+        .bug-statement::after {
+            content: ''; position: absolute; left: 0; top: 50%; width: 0; height: 2px; background-color: var(--soft);
+            transition: width 0.4s var(--ease-out);
+        }
+
+        .bug-lesson {
+            font-size: clamp(1rem, 1.2vw, 1.2rem);
+            color: var(--soft);
+            transition: color 0.3s;
+        }
+        .bug-lesson-label { font-family: var(--font-mono); font-size: 10px; display: block; margin-bottom: 10px; opacity: 0; transition: opacity 0.3s;}
+
+        /* Hover state */
+        @media (hover: hover) {
+            .bug-entry:hover .bug-statement { color: var(--soft); }
+            .bug-entry:hover .bug-statement::after { width: 100%; }
+            .bug-entry:hover .bug-lesson { color: var(--blue); }
+            .bug-entry:hover .bug-lesson-label { opacity: 1; color: var(--blue); }
+        }
+
+        /* Mobile specific - just show everything clearly */
+        @media (max-width: 768px) {
+            .bug-entry { grid-template-columns: 1fr; gap: 15px; padding: 30px 0; }
+            .bug-statement::after { display: none; }
+            .bug-statement { color: var(--soft); text-decoration: line-through; font-size: 1.2rem;}
+            .bug-lesson { color: var(--blue); font-size: 1.1rem; }
+            .bug-lesson-label { opacity: 1; color: var(--blue); display: inline-block; margin-right: 10px; margin-bottom: 0;}
+        }
+
+        .failure-label { font-family: var(--font-mono); font-size: 12px; margin-top: 40px; text-align: right; color: var(--soft); }
+
+        /* ==========================================================================
+           SECTION 06: PROBLEM SOLVING
+           ========================================================================== */
+        #solving {
+            background-color: var(--ink);
+            color: var(--paper);
+            justify-content: center;
+        }
+
+        .solving-content { display: flex; flex-direction: column; align-items: center; text-align: center; }
+
+        .ps-number {
+            font-size: clamp(6rem, 15vw, 15rem);
+            font-family: var(--font-serif);
+            line-height: 1;
+            margin-bottom: 20px;
+            color: var(--blue);
+        }
+
+        .ps-platforms { font-family: var(--font-mono); font-size: 12px; color: var(--soft); margin-bottom: 80px; letter-spacing: 0.1em;}
+
+        .thought-process {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            font-size: clamp(1.5rem, 3vw, 2.5rem);
+        }
+
+        .tp-step { opacity: 0; transform: translateY(20px); transition: all 0.8s var(--ease-out); }
+        .tp-step.crossed { text-decoration: line-through; color: var(--soft); }
+        .tp-step.final { color: var(--paper); font-family: var(--font-serif); font-style: italic; }
+
+        /* Staggered animation classes applied by JS */
+        .tp-step.show { opacity: 1; transform: translateY(0); }
+
+        .ps-pillars {
+            display: flex; gap: 40px; margin-top: 80px; font-family: var(--font-mono); font-size: 12px; color: var(--orange);
+        }
+
+        @media (max-width: 768px) { .ps-pillars { flex-direction: column; gap: 15px; } }
+
+        /* ==========================================================================
+           SECTION 07: EXPERIENCE
+           ========================================================================== */
+        .exp-list {
+            margin-top: 100px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .exp-row {
+            display: grid;
+            grid-template-columns: 1fr 3fr 2fr;
+            gap: 40px;
+            padding: 60px 0;
+            border-bottom: 1px solid var(--note);
+            align-items: start;
+        }
+
+        .exp-year { font-family: var(--font-mono); font-size: 2rem; color: var(--soft); }
+        .exp-role { font-size: 1.5rem; font-weight: 600; margin-bottom: 10px; }
+        .exp-company { font-family: var(--font-mono); font-size: 12px; color: var(--blue); margin-bottom: 20px; display: block; }
+
+        .exp-learning {
+            position: relative;
+            padding: 30px;
+            background-color: rgba(255, 92, 53, 0.05); /* Very faint orange */
+        }
+        .exp-learning::before {
+            content: 'MARGIN NOTE'; position: absolute; top: 10px; left: 10px; font-family: var(--font-mono); font-size: 9px; color: var(--orange);
+        }
+        .exp-learning p { font-family: var(--font-hand); color: var(--ink); font-size: 1.6rem; transform: rotate(-1deg); line-height: 1.2; margin-top: 10px;}
+
+        @media (max-width: 1024px) {
+            .exp-row { grid-template-columns: 1fr 2fr; }
+            .exp-learning { grid-column: 1 / -1; margin-top: 20px; }
+        }
+        @media (max-width: 768px) {
+            .exp-row { grid-template-columns: 1fr; gap: 10px; padding: 40px 0;}
+            .exp-year { font-size: 1.2rem; }
+            .exp-learning { padding: 20px; }
+        }
+
+        /* ==========================================================================
+           SECTION 08: CERTIFICATES
+           ========================================================================== */
+        .cert-header { margin-bottom: 80px; }
+
+        .cert-grid {
+            display: flex; flex-direction: column; gap: 80px;
+        }
+
+        .cert-receipt {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 60px;
+            border: 1px solid var(--note);
+            padding: 20px;
+            background: #fff; /* slightly brighter than paper to look like a separate document */
+        }
+
+        .cert-image {
+            width: 100%; aspect-ratio: 4/3; background-color: var(--paper);
+            display: flex; align-items: center; justify-content: center;
+            border: 1px dashed var(--note);
+        }
+
+        .cert-details {
+            display: flex; flex-direction: column; justify-content: space-between;
+            font-family: var(--font-mono); font-size: 13px; text-transform: uppercase;
+        }
+
+        .cd-row {
+            display: flex; border-bottom: 1px dotted var(--note); padding-bottom: 10px; margin-bottom: 10px;
+        }
+        .cd-label { width: 150px; color: var(--soft); }
+        .cd-value { flex: 1; font-family: var(--font-sans); text-transform: none; font-size: 1.1rem; }
+        .cd-value.serif { font-family: var(--font-serif); font-size: 1.5rem; font-style: italic; }
+
+        .cert-link { align-self: flex-start; margin-top: 20px; color: var(--blue); border-bottom: 1px solid var(--blue); padding-bottom: 2px;}
+
+        @media (max-width: 768px) {
+            .cert-receipt { grid-template-columns: 1fr; gap: 30px; padding: 15px; }
+            .cd-row { flex-direction: column; gap: 5px; }
+            .cd-label { width: 100%; font-size: 10px; }
+        }
+
+        /* ==========================================================================
+           SECTION 09: WHAT NEXT
+           ========================================================================== */
+        #next { justify-content: center; }
+
+        .next-list { margin-top: 80px; display: flex; flex-direction: column; gap: 20px; }
+
+        .next-item {
+            font-size: clamp(2rem, 4vw, 3.5rem);
+            color: var(--soft);
+            opacity: 0;
+            transform: translateX(-20px);
+            transition: all 0.5s var(--ease-out);
+        }
+        .is-visible .next-item { opacity: 1; transform: translateX(0); }
+
+        /* Staggered delays setup via inline style or nth-child in JS, doing CSS here for simplicity */
+        .next-item:nth-child(1) { transition-delay: 0.2s; }
+        .next-item:nth-child(2) { transition-delay: 0.4s; }
+        .next-item:nth-child(3) { transition-delay: 0.6s; }
+        .next-item:nth-child(4) { transition-delay: 0.8s; color: var(--blue); }
+
+        .next-conclusion {
+            margin-top: 60px; font-family: var(--font-serif); font-size: clamp(1.5rem, 3vw, 2.5rem); font-style: italic; opacity: 0;
+            transition: opacity 1s 1.2s;
+        }
+        .is-visible .next-conclusion { opacity: 1; }
+
+        .current-curiosity {
+            margin-top: 100px;
+            padding-top: 40px; border-top: 1px solid var(--note);
+            display: flex; justify-content: space-between; align-items: flex-end;
+        }
+        .cc-label { font-family: var(--font-mono); font-size: 12px; color: var(--orange); margin-bottom: 10px; display: block;}
+        .cc-list { display: flex; gap: 20px; font-family: var(--font-sans); font-size: 1.2rem; flex-wrap: wrap; }
+        .cc-list span { padding: 5px 15px; border: 1px solid var(--ink); border-radius: 20px; }
+
+        @media (max-width: 768px) {
+            .current-curiosity { flex-direction: column; align-items: flex-start; gap: 40px; }
+        }
+
+        /* ==========================================================================
+           SECTION 10: CONTACT
+           ========================================================================== */
+        #contact { background-color: var(--ink); color: var(--paper); }
+
+        .contact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10vw;
+            margin-top: 80px;
+        }
+
+        .contact-info { display: flex; flex-direction: column; gap: 40px; }
+        .contact-subtitle { font-family: var(--font-mono); font-size: 14px; color: var(--soft); }
+
+        .contact-email { font-size: clamp(1.5rem, 3vw, 2.5rem); text-decoration: underline; text-underline-offset: 8px; }
+
+        .contact-links { display: flex; gap: 20px; font-family: var(--font-mono); font-size: 12px; }
+        .contact-links a { padding: 10px 20px; border: 1px solid var(--soft); transition: all 0.3s; }
+        .contact-links a:hover { background-color: var(--paper); color: var(--ink); }
+
+        .contact-form {
+            display: flex; flex-direction: column; gap: 30px;
+        }
+
+        .input-group { position: relative; }
+        .input-group input, .input-group textarea {
+            width: 100%;
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid var(--soft);
+            padding: 15px 0;
+            color: var(--paper);
+            font-family: var(--font-sans);
+            font-size: 1.2rem;
+            resize: none;
+            transition: border-color 0.3s;
+        }
+        .input-group input:focus, .input-group textarea:focus { outline: none; border-color: var(--blue); }
+        .input-group label {
+            position: absolute; top: 15px; left: 0; font-family: var(--font-mono); font-size: 12px; color: var(--soft);
+            transition: all 0.3s; pointer-events: none;
+        }
+        .input-group input:focus ~ label, .input-group input:valid ~ label,
+        .input-group textarea:focus ~ label, .input-group textarea:valid ~ label {
+            top: -10px; font-size: 10px; color: var(--blue);
+        }
+
+        .submit-btn {
+            align-self: flex-start;
+            margin-top: 20px;
+            font-family: var(--font-mono);
+            font-size: 14px;
+            padding: 15px 30px;
+            background-color: var(--blue);
+            color: var(--paper);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        .submit-btn span { display: inline-block; transition: transform 0.3s cubic-bezier(0.76, 0, 0.24, 1); }
+        .submit-btn .hover-text { position: absolute; left: 30px; top: 100%; width: max-content; }
+
+        @media (hover: hover) {
+            .submit-btn:hover span.default-text { transform: translateY(-200%); }
+            .submit-btn:hover span.hover-text { transform: translateY(-100%); top: 15px;}
+            .submit-btn:hover { background-color: var(--paper); color: var(--ink); }
+        }
+
+        @media (max-width: 900px) {
+            .contact-grid { grid-template-columns: 1fr; gap: 60px; }
+        }
+
+        /* ==========================================================================
+           FOOTER
+           ========================================================================== */
+        footer {
+            background-color: var(--paper);
+            color: var(--ink);
+            padding: var(--gutter);
+            border-top: 1px solid var(--note);
+        }
+
+        .footer-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 80px;
+        }
+
+        .footer-identity h2 { font-size: clamp(4rem, 10vw, 8rem); line-height: 0.9; margin-bottom: 20px; letter-spacing: -0.02em;}
+        .footer-identity p { font-family: var(--font-mono); font-size: 12px; color: var(--soft); line-height: 1.6;}
+
+        .footer-links-wrap {
+            display: flex; gap: 60px;
+        }
+        .footer-col h4 { font-family: var(--font-mono); font-size: 10px; color: var(--soft); margin-bottom: 20px; }
+        .footer-col ul { display: flex; flex-direction: column; gap: 10px; }
+        .footer-col a { font-size: 1.2rem; transition: color 0.3s; }
+        .footer-col a:hover { color: var(--blue); }
+
+        .footer-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 40px;
+            border-top: 1px solid var(--note);
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--soft);
+        }
+
+        .footer-status { display: flex; gap: 40px; }
+
+        @media (max-width: 768px) {
+            .footer-top { flex-direction: column; align-items: flex-start; gap: 60px; }
+            .footer-links-wrap { width: 100%; justify-content: space-between; }
+            .footer-bottom { flex-direction: column; align-items: flex-start; gap: 20px; }
+            .footer-status { flex-direction: column; gap: 10px; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- CUSTOM CURSOR -->
+    <div id="custom-cursor"></div>
+    <div id="cursor-follower"></div>
+
+    <!-- INTRO SEQUENCE -->
+    <div id="intro-overlay">
+        <div id="intro-text-container">
+            <span id="intro-text"></span>
+            <svg id="intro-circle" viewBox="0 0 100 100" preserveAspectRatio="none">
+                <ellipse cx="50" cy="50" rx="48" ry="48" fill="none" vector-effect="non-scaling-stroke" />
+            </svg>
+        </div>
+        <div id="intro-details">
+            <p>KRISH GOYAL</p>
+            <p style="font-family: var(--font-mono); font-size: 12px; color: var(--soft);">BTECH AI & ML STUDENT</p>
+            <p style="font-family: var(--font-mono); font-size: 12px; color: var(--soft);">Lovely Professional University</p>
+        </div>
+        <div id="intro-line"></div>
+        <button class="skip-btn" onclick="skipIntro()" data-cursor="link">SKIP THOUGHT</button>
+    </div>
+
+    <!-- NAVIGATION -->
+    <nav>
+        <div class="nav-left">
+            <span>KRISH / 27</span>
+        </div>
+        <div class="nav-center">
+            <span>CURRENT THOUGHT:</span>
+            <span id="current-thought-text">CURIOSITY</span>
+        </div>
+        <div class="nav-right">
+            <button id="index-toggle" data-cursor="link">INDEX +</button>
+        </div>
+    </nav>
+
+    <!-- FULL SCREEN INDEX -->
+    <div id="index-overlay">
+        <div class="index-list">
+            <a href="#curiosity" class="index-item" data-cursor="link"><span class="num">01 /</span> CURIOSITY <span class="index-anno font-hand">start here</span></a>
+            <a href="#about" class="index-item" data-cursor="link"><span class="num">02 /</span> ABOUT ME <span class="index-anno font-hand" style="top:-10px;">who?</span></a>
+            <a href="#learning" class="index-item" data-cursor="link"><span class="num">03 /</span> THINGS I'M LEARNING <span class="index-anno font-hand">still learning this</span></a>
+            <a href="#built" class="index-item" data-cursor="link"><span class="num">04 /</span> THINGS I BUILT <span class="index-anno font-hand">worth it</span></a>
+            <a href="#broke" class="index-item" data-cursor="link"><span class="num">05 /</span> THINGS I BROKE <span class="index-anno font-hand">this was painful</span></a>
+            <a href="#experience" class="index-item" data-cursor="link"><span class="num">06 /</span> EXPERIENCE</a>
+            <a href="#certificates" class="index-item" data-cursor="link"><span class="num">07 /</span> PROOF <span class="index-anno font-hand">receipts</span></a>
+            <a href="#next" class="index-item" data-cursor="link"><span class="num">08 /</span> WHAT NEXT?</a>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <main>
+        <!-- SECTION 01: CURIOSITY -->
+        <section id="curiosity" data-thought="CURIOSITY">
+            <div class="floating-questions">
+                <div class="fq fq-1">how does an API actually work?</div>
+                <div class="fq fq-2">why is this O(n²)?</div>
+                <div class="fq fq-3">what happens after deployment?</div>
+                <div class="fq fq-4">can I automate this?</div>
+                <div class="fq fq-5">why did it work locally?</div>
+                <div class="fq fq-6">what if 10,000 users open this?</div>
+            </div>
+
+            <div class="hero-title reveal-wrap">
+                <h1 class="text-huge reveal-text">I KEEP <br>ASKING</h1>
+                <span class="text-huge why reveal-text" style="transition-delay: 0.2s;">why?</span>
+            </div>
+
+            <div class="hero-footer">
+                <div>
+                    <p class="font-mono">KRISH GOYAL</p>
+                    <p class="text-small">AI & ML ENGINEER / AI & ML ENGINEER</p>
+                </div>
+                <div class="hero-scroll font-mono text-small">
+                    SCROLL / FOLLOW THE THOUGHT
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 02: ABOUT -->
+        <section id="about" data-thought="WHO AM I?">
+            <div class="container">
+                <div class="reveal-wrap"><h2 class="text-large reveal-text">OKAY.<br>WHO'S <br>THINKING?</h2></div>
+
+                <div class="about-grid">
+                    <div class="about-content">
+                        <div class="about-bio text-body fade-in">
+                            <p>I'm Krish Goyal, a Computer Science student who learns best by building things I don't completely understand yet.</p>
+                            <p>I enjoy taking an idea, breaking it into smaller problems, learning whatever technology is required, and slowly turning it into a working product.</p>
+                            <p>Sometimes it works. <br>Sometimes I spend three hours finding a missing semicolon. <br>Both count as learning.</p>
+                        </div>
+
+                        <div class="about-statement fade-in">
+                            <h3 class="text-large">
+                                I'M NOT TRYING<br>TO KNOW<br>
+                                <span class="font-serif italic color-blue">everything.</span><br>
+                                I'M TRYING TO<br>UNDERSTAND<br>
+                                <span class="font-serif italic color-orange">more every day.</span>
+                            </h3>
+                            <a href="#" class="font-mono text-small" style="display:inline-block; margin-top:40px; border-bottom:1px solid var(--ink);" data-cursor="link">DOWNLOAD RESUME ↘</a>
+                        </div>
+                    </div>
+
+                    <div class="notebook-frame-wrapper fade-in">
+                        <span class="about-anno font-hand color-orange">that's me →</span>
+                        <div class="notebook-frame-inner">
+                            <span class="img-placeholder-text">KRISH_PROFILE_IMAGE</span>
+                        </div>
+                        <div class="about-meta font-mono text-small">
+                            <span>NAME / KRISH GOYAL</span>
+                            <span>ROLE / AI & ML ENGINEER</span>
+                            <span>FOCUS / AI & ML</span>
+                            <span>LOCATION / PUNJAB, INDIA</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 03: LEARNING -->
+        <section id="learning" data-thought="LEARNING">
+            <div class="container">
+                <div class="learning-header">
+                    <div class="reveal-wrap"><h2 class="text-large reveal-text">MY BRAIN<br>CURRENTLY HAS</h2></div>
+                    <div class="font-serif italic color-blue" style="font-size: clamp(2rem, 5vw, 4rem);">37 tabs open.</div>
+                </div>
+
+                <div class="learning-wall-grid" id="learning-wall">
+                    <!-- Nodes with data-related attribute for hover connections -->
+                    <div class="learning-node" data-related="js,react,node,express" data-id="js" data-cursor="skill">
+                        JAVASCRIPT
+                        <span class="learning-node-status">BUILDING WITH IT</span>
+                        <div class="mobile-learning-details">Core logic, ES6+, DOM manipulation. It's everywhere.</div>
+                    </div>
+                    <div class="learning-node" data-related="java,dsa,algo" data-id="java" data-cursor="skill">
+                        JAVA
+                        <span class="learning-node-status">USING</span>
+                        <div class="mobile-learning-details">Object-oriented principles, robust backend concepts.</div>
+                    </div>
+                    <div class="learning-node" data-related="java,algo" data-id="dsa" data-cursor="skill">
+                        DATA STRUCTURES
+                        <span class="learning-node-status">PRACTICING DAILY</span>
+                        <div class="mobile-learning-details">Arrays, Trees, Graphs. The foundation of problem-solving.</div>
+                    </div>
+                    <div class="learning-node" data-related="js,node,express" data-id="react" data-cursor="skill">
+                        REACT
+                        <span class="learning-node-status">FAVORITE</span>
+                        <div class="mobile-learning-details">Component architecture, hooks, state management.</div>
+                    </div>
+                    <div class="learning-node" data-related="js,express,mongo" data-id="node" data-cursor="skill">
+                        NODE.JS
+                        <span class="learning-node-status">SERVER SIDE</span>
+                        <div class="mobile-learning-details">V8 engine, async I/O, building scalable network applications.</div>
+                    </div>
+                    <div class="learning-node" data-related="node,mongo" data-id="express" data-cursor="skill">
+                        EXPRESS
+                        <span class="learning-node-status">ROUTING</span>
+                        <div class="mobile-learning-details">Minimalist web framework for Node.js APIs.</div>
+                    </div>
+                    <div class="learning-node" data-related="node,express" data-id="mongo" data-cursor="skill">
+                        MONGODB
+                        <span class="learning-node-status">BROKE IT. FIXED IT.</span>
+                        <div class="mobile-learning-details">NoSQL, document structure, aggregation pipelines.</div>
+                    </div>
+                    <div class="learning-node" data-related="java" data-id="mysql" data-cursor="skill">
+                        MYSQL
+                        <span class="learning-node-status">RELATIONAL</span>
+                        <div class="mobile-learning-details">Joins, normal forms, structured data queries.</div>
+                    </div>
+                    <div class="learning-node" data-related="java,dsa" data-id="algo" data-cursor="skill">
+                        ALGORITHMS
+                        <span class="learning-node-status">OPTIMIZING</span>
+                        <div class="mobile-learning-details">Time/Space complexity, sorting, searching, DP.</div>
+                    </div>
+                    <div class="learning-node" data-related="" data-id="sys" data-cursor="question">
+                        SYSTEM DESIGN
+                        <span class="learning-node-status">ASK ME IN 6 MONTHS</span>
+                        <div class="mobile-learning-details">Scaling, load balancing, microservices (Learning Phase).</div>
+                    </div>
+                    <div class="learning-node" data-related="" data-id="git" data-cursor="skill">
+                        GIT
+                        <span class="learning-node-status">VERSION CONTROL</span>
+                        <div class="mobile-learning-details">Branching, merging, saving my code from myself.</div>
+                    </div>
+                    <div class="learning-node" data-related="node,react" data-id="deploy" data-cursor="experiment">
+                        DEPLOYMENT
+                        <span class="learning-node-status">WHY DID IT BREAK?</span>
+                        <div class="mobile-learning-details">Vercel, Render, AWS basic concepts, CI/CD pipelines.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 04: BUILT -->
+        <section id="built" data-thought="BUILDING">
+            <div class="container">
+                <div class="reveal-wrap relative">
+                    <h2 class="text-large reveal-text">I HAD AN IDEA.<br>then I opened VS Code.</h2>
+                    <span class="build-intro-anno font-hand">famous last words</span>
+                </div>
+
+                <!-- Project 01 -->
+                <article class="project-story fade-in">
+                    <div class="project-meta-head">
+                        <span>01 / CODETEXA LMS</span>
+                        <span>AI & ML</span>
+                    </div>
+                    <h3 class="project-question" data-cursor="question">"How do you build one platform for students, teachers and admins?"</h3>
+
+                    <div class="project-image-wrap" data-cursor="project">
+                        <span class="img-placeholder-text">CODETEXA_PROJECT_IMAGE</span>
+                    </div>
+
+                    <div class="project-details-grid">
+                        <div class="pd-block">
+                            <h4>THE IDEA</h4>
+                            <p class="text-body">A learning platform with separate workflows for different user roles within an institute.</p>
+                        </div>
+                        <div class="pd-block">
+                            <h4>THE PROBLEM</h4>
+                            <ul class="text-body color-soft" style="list-style-type: square; padding-left: 15px;">
+                                <li>Authentication & Security</li>
+                                <li>Role-based access control</li>
+                                <li>Cloud media handling</li>
+                                <li>Dashboard analytics</li>
+                            </ul>
+                        </div>
+                        <div class="pd-block">
+                            <h4>WHAT I BUILT</h4>
+                            <p class="text-body">A full-scale MERN Learning Management System from scratch to production.</p>
+                        </div>
+                        <div class="pd-block">
+                            <h4>TECH STACK</h4>
+                            <p class="font-mono text-small">MongoDB, Express, React, Node.js, JWT, AWS S3</p>
+                        </div>
+                        <div class="pd-learned">
+                            "A project stops being simple the moment real users need different things."
+                        </div>
+                    </div>
+                    <div class="project-links">
+                        <a href="#" data-cursor="link">LIVE PROJECT ↗</a>
+                        <a href="#" data-cursor="link">VIEW CODE ↗</a>
+                    </div>
+                </article>
+
+                <!-- Project 02 -->
+                <article class="project-story fade-in">
+                    <div class="project-meta-head">
+                        <span>02 / DSPL TECHNOLOGY</span>
+                        <span>AGENCY PLATFORM</span>
+                    </div>
+                    <h3 class="project-question" data-cursor="question">"Can a corporate website feel premium and fast at the same time?"</h3>
+
+                    <div class="project-image-wrap" data-cursor="project">
+                        <span class="img-placeholder-text">DSPL_PROJECT_IMAGE</span>
+                    </div>
+
+                    <div class="project-details-grid">
+                        <div class="pd-block">
+                            <h4>THE IDEA</h4>
+                            <p class="text-body">A creative technology agency website focused on showcasing digital experiences and services.</p>
+                        </div>
+                        <div class="pd-block">
+                            <h4>THE PROBLEM</h4>
+                            <p class="text-body color-soft">Balancing high-quality visual assets and animations with fast load times and SEO performance.</p>
+                        </div>
+                        <div class="pd-block">
+                            <h4>WHAT I BUILT</h4>
+                            <p class="text-body">A highly optimized frontend architecture with custom CMS integration.</p>
+                        </div>
+                        <div class="pd-block">
+                            <h4>TECH STACK</h4>
+                            <p class="font-mono text-small">React, Next.js, Framer Motion, Tailwind</p>
+                        </div>
+                        <div class="pd-learned">
+                            "Design gets them to stay, performance gets them to convert."
+                        </div>
+                    </div>
+                    <div class="project-links">
+                        <a href="#" data-cursor="link">LIVE PROJECT ↗</a>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <!-- SECTION 05: BROKE -->
+        <section id="broke" data-thought="BREAKING">
+            <div class="container">
+                <div class="reveal-wrap"><h2 class="text-large reveal-text">THINGS<br>I BROKE.</h2></div>
+                <p class="font-serif italic text-large color-soft" style="margin-top:-10px;">and what they taught me.</p>
+
+                <div class="debug-journal fade-in">
+
+                    <div class="bug-entry" data-cursor="experiment">
+                        <div class="bug-id">BUG_001</div>
+                        <div class="bug-content">
+                            <h3 class="bug-statement">THE WEBSITE WORKED LOCALLY. DEPLOYMENT SAID NO.</h3>
+                        </div>
+                        <div class="bug-lesson-wrap">
+                            <span class="bug-lesson-label">LESSON</span>
+                            <p class="bug-lesson">Environment variables, build paths, and production environments matter. "Works on my machine" is not a feature.</p>
+                        </div>
+                    </div>
+
+                    <div class="bug-entry" data-cursor="experiment">
+                        <div class="bug-id">BUG_002</div>
+                        <div class="bug-content">
+                            <h3 class="bug-statement">EVERY USER COULD SEE EVERYTHING IN THE DASHBOARD.</h3>
+                        </div>
+                        <div class="bug-lesson-wrap">
+                            <span class="bug-lesson-label">LESSON</span>
+                            <p class="bug-lesson">Authentication is identifying who the user is. Authorization is deciding what they can see. Do not mix them up.</p>
+                        </div>
+                    </div>
+
+                    <div class="bug-entry" data-cursor="experiment">
+                        <div class="bug-id">BUG_003</div>
+                        <div class="bug-content">
+                            <h3 class="bug-statement">THE MOBILE DESIGN LOOKED PERFECT. ON MY LAPTOP.</h3>
+                        </div>
+                        <div class="bug-lesson-wrap">
+                            <span class="bug-lesson-label">LESSON</span>
+                            <p class="bug-lesson">Responsive design must be designed from the start, not patched at the end with media queries.</p>
+                        </div>
+                    </div>
+
+                    <div class="bug-entry" data-cursor="experiment">
+                        <div class="bug-id">BUG_004</div>
+                        <div class="bug-content">
+                            <h3 class="bug-statement">I CHANGED ONE THING. FIVE THINGS BROKE.</h3>
+                        </div>
+                        <div class="bug-lesson-wrap">
+                            <span class="bug-lesson-label">LESSON</span>
+                            <p class="bug-lesson">Spaghetti code is fast to write but impossible to maintain. Component structure and separation of concerns save hours of debugging.</p>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="failure-label">FAILURE ≠ WASTED TIME</div>
+            </div>
+        </section>
+
+        <!-- SECTION 06: PROBLEM SOLVING -->
+        <section id="solving" data-thought="LOGIC">
+            <div class="container solving-content">
+                <span class="font-mono text-small color-blue" style="border:1px solid var(--blue); padding: 5px 15px; border-radius: 20px; margin-bottom: 40px;">THE DAILY PRACTICE</span>
+
+                <h2 class="ps-number" id="problem-counter">0</h2>
+                <div class="font-sans" style="font-size: clamp(2rem, 5vw, 4rem); font-weight: 600; line-height: 1; margin-bottom: 20px;">PROBLEMS<br>SOLVED.</div>
+                <div class="ps-platforms">LEETCODE / GEEKSFORGEEKS / HACKERRANK</div>
+
+                <div class="thought-process" id="tp-container">
+                    <div class="tp-step">"Why is this giving TLE?"</div>
+                    <div class="tp-step">"Can I reduce the time complexity?"</div>
+                    <div class="tp-step final">"Can I explain why this works?"</div>
+                </div>
+
+                <div class="ps-pillars fade-in">
+                    <span>LOGIC</span>
+                    <span>CONSISTENCY</span>
+                    <span>OPTIMIZATION</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 07: EXPERIENCE -->
+        <section id="experience" data-thought="EXPERIENCE">
+            <div class="container">
+                <div class="reveal-wrap"><h2 class="text-large reveal-text">SOME THINGS<br>CAN'T BE LEARNED</h2></div>
+                <p class="font-serif italic text-large color-soft" style="margin-top:-10px;">from tutorials.</p>
+
+                <div class="exp-list">
+
+                    <div class="exp-row fade-in">
+                        <div class="exp-year">2026</div>
+                        <div class="exp-details">
+                            <h3 class="exp-role">FREELANCE AI & ML ENGINEER</h3>
+                            <span class="exp-company">CODE TEXA LMS</span>
+                            <p class="text-body">Built and delivered a full-scale Learning Management System on the MERN stack, handling architecture, module planning, development, testing and production deployment.</p>
+                        </div>
+                        <div class="exp-learning">
+                            <p>"Building the feature is only half the job. Making the entire system work together is the real challenge."</p>
+                        </div>
+                    </div>
+
+                    <div class="exp-row fade-in">
+                        <div class="exp-year">2025</div>
+                        <div class="exp-details">
+                            <h3 class="exp-role">AI & ML ENGINEER INTERN</h3>
+                            <span class="exp-company">DSPL TECHNOLOGIES</span>
+                            <p class="text-body">Worked on modernizing the company website into a structured MERN-based platform and improved frontend stability, responsive behavior and production quality.</p>
+                        </div>
+                        <div class="exp-learning">
+                            <p>"Production code forces you to notice details personal projects let you ignore."</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 08: CERTIFICATES -->
+        <section id="certificates" data-thought="PROOF">
+            <div class="container">
+                <div class="cert-header">
+                    <div class="reveal-wrap"><h2 class="text-large reveal-text">YES.<br>I ALSO<br>FINISH COURSES.</h2></div>
+                    <span class="font-hand color-orange" style="display:block; margin-top: -20px; margin-left: 200px;">sometimes 😅</span>
+                </div>
+
+                <div class="cert-grid">
+
+                    <div class="cert-receipt fade-in">
+                        <div class="cert-image"><span class="img-placeholder-text">CERT_MYSQL_IMAGE</span></div>
+                        <div class="cert-details">
+                            <div>
+                                <div class="cd-row"><span class="cd-label">RECEIPT</span><span class="cd-value font-mono text-small">001</span></div>
+                                <div class="cd-row"><span class="cd-label">COURSE</span><span class="cd-value serif">Database Structures and Management with MySQL</span></div>
+                                <div class="cd-row"><span class="cd-label">ISSUER</span><span class="cd-value">Meta / Coursera</span></div>
+                            </div>
+                            <div style="margin-top:20px;">
+                                <div class="font-mono" style="font-size: 10px; color: var(--soft); margin-bottom: 5px;">WHAT I TOOK FROM IT</div>
+                                <p class="text-body" style="text-transform: none;">Solid understanding of relational algebra, complex joins, and how to structure data efficiently before writing a single line of application code.</p>
+                                <a href="#" class="cert-link" data-cursor="link">VERIFY ↗</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="cert-receipt fade-in">
+                        <div class="cert-image"><span class="img-placeholder-text">CERT_WEB_IMAGE</span></div>
+                        <div class="cert-details">
+                            <div>
+                                <div class="cd-row"><span class="cd-label">RECEIPT</span><span class="cd-value font-mono text-small">002</span></div>
+                                <div class="cd-row"><span class="cd-label">COURSE</span><span class="cd-value serif">Responsive Web Design</span></div>
+                                <div class="cd-row"><span class="cd-label">ISSUER</span><span class="cd-value">freeCodeCamp</span></div>
+                            </div>
+                            <div style="margin-top:20px;">
+                                <div class="font-mono" style="font-size: 10px; color: var(--soft); margin-bottom: 5px;">WHAT I TOOK FROM IT</div>
+                                <p class="text-body" style="text-transform: none;">The foundational realization that the web is fluid, and hardcoding pixel values is a guaranteed way to break layouts.</p>
+                                <a href="#" class="cert-link" data-cursor="link">VERIFY ↗</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="cert-receipt fade-in">
+                        <div class="cert-image"><span class="img-placeholder-text">CERT_DSA_IMAGE</span></div>
+                        <div class="cert-details">
+                            <div>
+                                <div class="cd-row"><span class="cd-label">RECEIPT</span><span class="cd-value font-mono text-small">003</span></div>
+                                <div class="cd-row"><span class="cd-label">COURSE</span><span class="cd-value serif">Data Structures and Algorithm</span></div>
+                                <div class="cd-row"><span class="cd-label">ISSUER</span><span class="cd-value">LPU / iamneo</span></div>
+                            </div>
+                            <div style="margin-top:20px;">
+                                <div class="font-mono" style="font-size: 10px; color: var(--soft); margin-bottom: 5px;">WHAT I TOOK FROM IT</div>
+                                <p class="text-body" style="text-transform: none;">Algorithmic thinking. Learning that there are multiple ways to solve a problem, but some are objectively better at scale.</p>
+                                <a href="#" class="cert-link" data-cursor="link">VERIFY ↗</a>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 09: WHAT NEXT -->
+        <section id="next" data-thought="WHAT NEXT?">
+            <div class="container">
+                <h2 class="text-large fade-in">SO...<br>WHAT AM I<br>BUILDING <span class="font-serif italic color-blue">next?</span><span style="animation: blinkCursor 1s infinite; display:inline-block; width:4px; height:0.8em; background:var(--ink); margin-left:5px; transform:translateY(5px);"></span></h2>
+
+                <div class="next-list" id="next-ideas">
+                    <div class="next-item font-sans font-bold">A BETTER BACKEND SYSTEM</div>
+                    <div class="next-item font-sans font-bold">AN AI-POWERED PRODUCT</div>
+                    <div class="next-item font-sans font-bold">SOMETHING WITH REAL USERS</div>
+                    <div class="next-item font-sans font-bold">A PROJECT I CURRENTLY DON'T KNOW HOW TO BUILD</div>
+                </div>
+
+                <div class="next-conclusion">That's usually the point.</div>
+
+                <div class="current-curiosity fade-in">
+                    <div>
+                        <span class="cc-label">CURRENTLY THINKING ABOUT:</span>
+                        <div class="cc-list">
+                            <span>SCALABLE BACKENDS</span>
+                            <span>SYSTEM DESIGN</span>
+                            <span>AI + WEB PRODUCTS</span>
+                            <span>BETTER ENGINEERING WORKFLOWS</span>
+                        </div>
+                    </div>
+                    <div class="font-mono text-small" style="text-align:right;">LAST UPDATED / 2026</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 10: CONTACT -->
+        <section id="contact" data-thought="CONTACT">
+            <div class="container">
+                <div class="reveal-wrap"><h2 class="text-large reveal-text">HAVE AN IDEA?<br>I HAVE<br><span class="font-serif italic color-blue">questions.</span></h2></div>
+                <p class="text-body color-soft" style="margin-top:20px;">That usually means we should talk.</p>
+
+                <div class="contact-grid">
+                    <div class="contact-info fade-in">
+                        <div>
+                            <span class="contact-subtitle">EMAIL</span><br>
+                            <a href="mailto:krishgoyal.dev@gmail.com" class="contact-email" data-cursor="link">krishgoyal.dev@gmail.com</a>
+                            <button class="font-mono text-small" style="display:block; margin-top:10px; color:var(--soft);" onclick="navigator.clipboard.writeText('krishgoyal.dev@gmail.com'); this.innerText='COPIED!'">COPY EMAIL</button>
+                        </div>
+                        <div>
+                            <span class="contact-subtitle">PHONE</span><br>
+                            <a href="tel:+919415156079" class="font-sans" style="font-size: 1.5rem;" data-cursor="link">+91-9876543210</a>
+                        </div>
+                        <div>
+                            <span class="contact-subtitle">DIRECT LINKS</span><br>
+                            <div class="contact-links" style="margin-top:10px;">
+                                <a href="#" data-cursor="link">GITHUB ↗</a>
+                                <a href="#" data-cursor="link">LINKEDIN ↗</a>
+                                <a href="#" data-cursor="link">INSTAGRAM ↗</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form class="contact-form fade-in" onsubmit="event.preventDefault();">
+                        <div class="input-group">
+                            <input type="text" id="name" required>
+                            <label for="name">NAME</label>
+                        </div>
+                        <div class="input-group">
+                            <input type="email" id="email" required>
+                            <label for="email">EMAIL</label>
+                        </div>
+                        <div class="input-group">
+                            <input type="text" id="topic" required>
+                            <label for="topic">WHAT ARE YOU THINKING ABOUT?</label>
+                        </div>
+                        <div class="input-group">
+                            <textarea id="message" rows="4" required></textarea>
+                            <label for="message">MESSAGE</label>
+                        </div>
+                        <button type="submit" class="submit-btn" data-cursor="link">
+                            <span class="default-text">SEND THE THOUGHT ↗</span>
+                            <span class="hover-text">LET'S FIGURE IT OUT ↗</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="container">
+            <div class="footer-top">
+                <div class="footer-identity fade-in">
+                    <h2>STILL<br>LEARNING.</h2>
+                    <p>KRISH GOYAL<br>BTECH AI & ML STUDENT<br>AI & ML ENGINEER<br>Lovely Professional University</p>
+                </div>
+                <div class="footer-links-wrap fade-in">
+                    <div class="footer-col">
+                        <h4>DEV PROFILES</h4>
+                        <ul>
+                            <li><a href="#" data-cursor="link">GITHUB</a></li>
+                            <li><a href="#" data-cursor="link">LEETCODE</a></li>
+                            <li><a href="#" data-cursor="link">GEEKSFORGEEKS</a></li>
+                            <li><a href="#" data-cursor="link">HACKERRANK</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-col">
+                        <h4>SOCIAL / CONTACT</h4>
+                        <ul>
+                            <li><a href="#" data-cursor="link">LINKEDIN</a></li>
+                            <li><a href="#" data-cursor="link">INSTAGRAM</a></li>
+                            <li><a href="#" data-cursor="link">FACEBOOK</a></li>
+                            <li><a href="#" data-cursor="link">EMAIL</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom fade-in">
+                <div>© 2026 KRISH GOYAL</div>
+                <div class="footer-status">
+                    <span>CURRENT STATUS / CURIOUS</span>
+                    <span id="live-time">LOCAL TIME / 00:00:00 INDIA</span>
+                </div>
+                <div class="font-hand color-soft" style="font-size: 1.2rem; transform: none;">probably debugging something right now.</div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // ==========================================================================
+        // SYSTEM & UTILS
+        // ==========================================================================
+        const isMobile = window.matchMedia("(max-width: 768px)").matches;
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        // ==========================================================================
+        // INTRO SEQUENCE
+        // ==========================================================================
+        const introOverlay = document.getElementById('intro-overlay');
+        const introText = document.getElementById('intro-text');
+        const introCircle = document.getElementById('intro-circle');
+        const introDetails = document.getElementById('intro-details');
+        const introLine = document.getElementById('intro-line');
+
+        async function typeWriter(text, element, speed = 50) {
+            for (let i = 0; i < text.length; i++) {
+                element.textContent += text.charAt(i);
+                await new Promise(r => setTimeout(r, speed));
+            }
+        }
+
+        async function deleteText(charsToKeep, element, speed = 30) {
+            while (element.textContent.length > charsToKeep) {
+                element.textContent = element.textContent.slice(0, -1);
+                await new Promise(r => setTimeout(r, speed));
+            }
+        }
+
+        async function runIntro() {
+            if (sessionStorage.getItem('introPlayed') === 'true') {
+                skipIntro();
+                return;
+            }
+
+            document.body.style.overflow = 'hidden';
+
+            await new Promise(r => setTimeout(r, 500));
+            await typeWriter("what should I build?", introText);
+            await new Promise(r => setTimeout(r, 600));
+
+            await deleteText(14, introText); // "what should I "
+            await typeWriter("learn?", introText);
+            await new Promise(r => setTimeout(r, 600));
+
+            await deleteText(14, introText);
+            await typeWriter("break?", introText);
+            await new Promise(r => setTimeout(r, 600));
+
+            await deleteText(14, introText);
+            await typeWriter("why not all three?", introText);
+
+            // Draw circle around "all three"
+            // Simple hack: position circle based on text length
+            setTimeout(() => {
+                introCircle.style.left = '85%';
+                introCircle.style.width = '30%';
+                introCircle.classList.add('draw-circle');
+            }, 200);
+
+            await new Promise(r => setTimeout(r, 800));
+
+            introDetails.style.opacity = '1';
+            introDetails.style.transform = 'translateY(0)';
+
+            await new Promise(r => setTimeout(r, 1200));
+
+            // Exit animation
+            introLine.style.transition = 'width 0.8s cubic-bezier(0.76, 0, 0.24, 1)';
+            introLine.style.width = '100%';
+
+            setTimeout(() => {
+                introOverlay.style.transition = 'transform 0.8s cubic-bezier(0.76, 0, 0.24, 1)';
+                introOverlay.style.transform = 'translateY(-100%)';
+                document.body.style.overflow = '';
+                sessionStorage.setItem('introPlayed', 'true');
+                initScrollAnimations();
+            }, 800);
+        }
+
+        function skipIntro() {
+            introOverlay.style.display = 'none';
+            document.body.style.overflow = '';
+            sessionStorage.setItem('introPlayed', 'true');
+            initScrollAnimations();
+        }
+
+        if (!prefersReducedMotion) {
+            runIntro();
+        } else {
+            skipIntro();
+        }
+
+        // ==========================================================================
+        // CUSTOM CURSOR
+        // ==========================================================================
+        if (!isMobile && window.matchMedia("(pointer: fine)").matches) {
+            const cursor = document.getElementById('custom-cursor');
+            const follower = document.getElementById('cursor-follower');
+            let mouseX = -100, mouseY = -100;
+            let cursorX = -100, cursorY = -100;
+            let followerX = -100, followerY = -100;
+
+            document.addEventListener('mousemove', (e) => {
+                document.body.classList.add('cursor-active');
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+            });
+
+            function renderCursor() {
+                // Main dot follows instantly
+                cursorX = mouseX;
+                cursorY = mouseY;
+                cursor.style.transform = `translate(${cursorX}px, ${cursorY}px) translate(-50%, -50%)`;
+
+                // Follower has slight delay/lerp
+                followerX += (mouseX - followerX) * 0.15;
+                followerY += (mouseY - followerY) * 0.15;
+                follower.style.transform = `translate(${followerX}px, ${followerY}px) translate(-50%, -50%)`;
+
+                requestAnimationFrame(renderCursor);
+            }
+            requestAnimationFrame(renderCursor);
+
+            // Hover interactions
+            const interactables = document.querySelectorAll('[data-cursor]');
+            interactables.forEach(el => {
+                el.addEventListener('mouseenter', () => {
+                    const type = el.getAttribute('data-cursor');
+                    cursor.className = ''; // reset
+                    if(type) cursor.classList.add(`state-${type}`);
+                });
+                el.addEventListener('mouseleave', () => {
+                    cursor.className = '';
+                });
+            });
+        }
+
+        // ==========================================================================
+        // FLOATING QUESTIONS (HERO)
+        // ==========================================================================
+        if (!isMobile && !prefersReducedMotion) {
+            const fqs = document.querySelectorAll('.fq');
+            let fqData = [];
+
+            // Store initial transforms
+            fqs.forEach(fq => {
+                const style = window.getComputedStyle(fq);
+                const matrix = new DOMMatrixReadOnly(style.transform);
+                // Extract basic rotation roughly for re-applying
+                let angle = Math.atan2(matrix.b, matrix.a) * (180/Math.PI);
+                fqData.push({ el: fq, rot: angle || 0 });
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if(document.hidden) return;
+                const mouseX = e.clientX;
+                const mouseY = e.clientY;
+                const windowCenterX = window.innerWidth / 2;
+                const windowCenterY = window.innerHeight / 2;
+
+                fqData.forEach(item => {
+                    const rect = item.el.getBoundingClientRect();
+                    const elCenterX = rect.left + rect.width / 2;
+                    const elCenterY = rect.top + rect.height / 2;
+
+                    // Move based on distance from mouse (subtle)
+                    const distX = (mouseX - elCenterX) * -0.01;
+                    const distY = (mouseY - elCenterY) * -0.01;
+
+                    item.el.style.transform = `translate(${distX}px, ${distY}px) rotate(${item.rot}deg)`;
+                });
+            }, { passive: true });
+        }
+
+        // ==========================================================================
+        // INDEX MENU
+        // ==========================================================================
+        const indexBtn = document.getElementById('index-toggle');
+        const indexOverlay = document.getElementById('index-overlay');
+        const indexLinks = document.querySelectorAll('.index-item');
+        let indexOpen = false;
+
+        function toggleIndex() {
+            indexOpen = !indexOpen;
+            if (indexOpen) {
+                indexOverlay.classList.add('active');
+                indexBtn.textContent = 'CLOSE X';
+                document.body.style.overflow = 'hidden';
+            } else {
+                indexOverlay.classList.remove('active');
+                indexBtn.textContent = 'INDEX +';
+                document.body.style.overflow = '';
+            }
+        }
+
+        indexBtn.addEventListener('click', toggleIndex);
+        indexLinks.forEach(link => link.addEventListener('click', () => {
+            if(indexOpen) toggleIndex();
+        }));
+
+        // ==========================================================================
+        // SCROLL OBSERVERS (Animations & Navigation)
+        // ==========================================================================
+        const sections = document.querySelectorAll('section');
+        const currentThoughtText = document.getElementById('current-thought-text');
+
+        // Setup observer for fade-ins and text reveals
+        const appearanceObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('is-visible');
+                }
+            });
+        }, { threshold: 0.15 });
+
+        function initScrollAnimations() {
+            document.querySelectorAll('.reveal-wrap, .fade-in, .notebook-frame-wrapper, #next-ideas').forEach(el => {
+                appearanceObserver.observe(el);
+            });
+        }
+
+        // Observer for updating current thought in nav
+        const thoughtObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const thought = entry.target.getAttribute('data-thought');
+                    if (thought) currentThoughtText.textContent = thought;
+                }
+            });
+        }, { threshold: 0.5 }); // Fire when section is halfway in view
+
+        sections.forEach(section => thoughtObserver.observe(section));
+
+        // ==========================================================================
+        // LEARNING WALL INTERACTION
+        // ==========================================================================
+        const learningWall = document.getElementById('learning-wall');
+        const nodes = document.querySelectorAll('.learning-node');
+
+        if (!isMobile) {
+            nodes.forEach(node => {
+                node.addEventListener('mouseenter', () => {
+                    learningWall.classList.add('is-hovering');
+                    node.classList.add('active');
+                    const relatedIds = node.getAttribute('data-related').split(',');
+
+                    nodes.forEach(n => {
+                        if (relatedIds.includes(n.getAttribute('data-id'))) {
+                            n.classList.add('related');
+                        }
+                    });
+                });
+
+                node.addEventListener('mouseleave', () => {
+                    learningWall.classList.remove('is-hovering');
+                    nodes.forEach(n => {
+                        n.classList.remove('active');
+                        n.classList.remove('related');
+                    });
+                });
+            });
+        } else {
+            // Mobile toggle behavior
+            nodes.forEach(node => {
+                node.addEventListener('click', () => {
+                    // Close others
+                    nodes.forEach(n => { if(n !== node) n.classList.remove('mobile-open'); });
+                    node.classList.toggle('mobile-open');
+                });
+            });
+        }
+
+        // ==========================================================================
+        // PROBLEM SOLVING COUNTER & THOUGHT PROCESS
+        // ==========================================================================
+        const problemSection = document.getElementById('solving');
+        const counterEl = document.getElementById('problem-counter');
+        const tpContainer = document.getElementById('tp-container');
+        const tpSteps = document.querySelectorAll('.tp-step');
+        let counterAnimated = false;
+
+        const problemObserver = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting && !counterAnimated && !prefersReducedMotion) {
+                counterAnimated = true;
+
+                // Scramble counter
+                let start = 0;
+                const end = 200;
+                const duration = 1500;
+                const startTime = performance.now();
+
+                function updateCounter(currentTime) {
+                    const elapsed = currentTime - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+                    // easeOutQuart
+                    const ease = 1 - Math.pow(1 - progress, 4);
+
+                    // Rapid random before settling
+                    if (progress < 0.9) {
+                        counterEl.textContent = Math.floor(Math.random() * 500) + "+";
+                    } else {
+                        counterEl.textContent = Math.floor(ease * end) + "+";
+                    }
+
+                    if (progress < 1) {
+                        requestAnimationFrame(updateCounter);
+                    } else {
+                        counterEl.textContent = "200+";
+                        runThoughtProcess();
+                    }
+                }
+                requestAnimationFrame(updateCounter);
+            } else if (entries[0].isIntersecting && counterAnimated) {
+                 // Fallback if already animated or reduced motion
+                 counterEl.textContent = "200+";
+                 if(prefersReducedMotion) runThoughtProcess();
+            }
+        }, { threshold: 0.5 });
+
+        problemObserver.observe(problemSection);
+
+        function runThoughtProcess() {
+            setTimeout(() => {
+                tpSteps[0].classList.add('show');
+                setTimeout(() => {
+                    tpSteps[0].classList.add('crossed');
+                    tpSteps[1].classList.add('show');
+                    setTimeout(() => {
+                        tpSteps[1].classList.add('crossed');
+                        tpSteps[2].classList.add('show');
+                    }, 800);
+                }, 1000);
+            }, 500);
+        }
+
+        // ==========================================================================
+        // LIVE TIME
+        // ==========================================================================
+        const timeEl = document.getElementById('live-time');
+
+        function updateTime() {
+            const now = new Date();
+            // Format to IST
+            const options = { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
+            const timeString = now.toLocaleTimeString('en-US', options);
+            timeEl.textContent = `LOCAL TIME / ${timeString} INDIA`;
+        }
+
+        setInterval(updateTime, 1000);
+        updateTime();
+
+    </script>
+</body>
+</html>
