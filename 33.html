@@ -1,0 +1,1936 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Krish Goyal | Observatory</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100..800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* Palette */
+            --bg-color: #070707;
+            --bg-secondary: #0B0B0C;
+            --bg-tertiary: #111113;
+            --text-primary: #F2F0E9;
+            --text-secondary: #88888F;
+            --accent-green: #B7FF3C;
+            --accent-silver: #B8BDC7;
+            
+            /* Typography */
+            --font-sans: 'Space Grotesk', sans-serif;
+            --font-serif: 'Playfair Display', serif;
+            --font-mono: 'JetBrains Mono', monospace;
+            
+            /* Easings */
+            --ease-cinematic: cubic-bezier(0.76, 0, 0.24, 1);
+            --ease-snappy: cubic-bezier(0.16, 1, 0.3, 1);
+            
+            /* Layout */
+            --gutter: clamp(18px, 4vw, 60px);
+            --nav-height: 80px;
+        }
+
+        /* --- Resets & Setup --- */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: auto; /* Handled by JS/Native smoothness */
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font-family: var(--font-sans);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
+            width: 100%;
+            min-height: 100vh;
+            cursor: none; /* Custom cursor */
+        }
+
+        body.loading {
+            overflow: hidden;
+        }
+
+        /* Responsive typography scale */
+        h1, .massive-text {
+            font-size: clamp(3rem, 9vw, 9rem);
+            line-height: 0.9;
+            text-transform: uppercase;
+            font-weight: 500;
+            letter-spacing: -0.03em;
+        }
+
+        h2 {
+            font-size: clamp(2.5rem, 6vw, 6rem);
+            line-height: 1;
+            text-transform: uppercase;
+            font-weight: 500;
+            letter-spacing: -0.02em;
+        }
+
+        h3 {
+            font-size: clamp(1.5rem, 3vw, 3rem);
+            font-weight: 400;
+        }
+
+        p {
+            font-size: clamp(1rem, 1.2vw, 1.25rem);
+            line-height: 1.6;
+            color: var(--text-secondary);
+        }
+
+        .serif {
+            font-family: var(--font-serif);
+            text-transform: none;
+            letter-spacing: 0;
+        }
+
+        .italic {
+            font-style: italic;
+        }
+
+        .mono-label {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-secondary);
+        }
+
+        .green-text {
+            color: var(--accent-green);
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+            cursor: none;
+        }
+
+        ul {
+            list-style: none;
+        }
+
+        /* --- Global Noise & Lighting --- */
+        .noise-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 999;
+            pointer-events: none;
+            background: url('data:image/svg+xml;utf8,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)" opacity="0.035"/%3E%3C/svg%3E');
+        }
+
+        .radial-light {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            background: radial-gradient(circle at 50% 50%, rgba(183, 255, 60, 0.03) 0%, transparent 60%);
+            z-index: -1;
+            transition: background 0.3s ease;
+        }
+
+        /* --- Loader Sequence --- */
+        .loader {
+            position: fixed;
+            inset: 0;
+            background-color: var(--bg-color);
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transform-origin: top;
+            transition: transform 1s var(--ease-cinematic);
+        }
+
+        .loader-content {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .scan-line-container {
+            width: 200px;
+            height: 1px;
+            background: var(--bg-tertiary);
+            position: relative;
+            overflow: hidden;
+            margin-top: 1rem;
+        }
+
+        .scan-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 30%;
+            background: var(--accent-green);
+            animation: scanAnim 1.5s linear infinite;
+        }
+
+        @keyframes scanAnim {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(400%); }
+        }
+
+        .loader-text {
+            height: 1rem;
+            overflow: hidden;
+        }
+
+        .loader-text span {
+            display: block;
+            animation: textSwap 0.5s var(--ease-snappy);
+        }
+
+        /* --- Custom Cursor --- */
+        @media (pointer: coarse), (hover: none) {
+            body { cursor: auto; }
+            a, button, input, textarea { cursor: pointer; }
+            .cursor-dot, .cursor-ring { display: none !important; }
+        }
+
+        .cursor-dot {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 4px;
+            background: var(--accent-green);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 10001;
+            transform: translate(-50%, -50%);
+            transition: width 0.3s, height 0.3s, background 0.3s;
+        }
+
+        .cursor-ring {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 30px;
+            height: 30px;
+            border: 1px solid rgba(183, 255, 60, 0.4);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 10000;
+            transform: translate(-50%, -50%);
+            transition: width 0.4s var(--ease-snappy), height 0.4s var(--ease-snappy), border-color 0.3s, background 0.3s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .cursor-ring::after {
+            content: attr(data-text);
+            font-family: var(--font-mono);
+            font-size: 0.5rem;
+            color: var(--bg-color);
+            opacity: 0;
+            transition: opacity 0.3s;
+            text-transform: uppercase;
+        }
+
+        .cursor-hover .cursor-dot {
+            opacity: 0;
+        }
+
+        .cursor-hover .cursor-ring {
+            width: 70px;
+            height: 70px;
+            background: var(--accent-green);
+            border-color: var(--accent-green);
+        }
+
+        .cursor-hover .cursor-ring::after {
+            opacity: 1;
+        }
+
+        /* --- Fixed Scroll Indicator --- */
+        .scroll-indicator {
+            position: fixed;
+            right: var(--gutter);
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            z-index: 100;
+            mix-blend-mode: difference;
+        }
+
+        .scroll-line {
+            width: 1px;
+            height: 60px;
+            background: var(--text-secondary);
+            position: relative;
+        }
+
+        .scroll-progress {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 0%;
+            background: var(--accent-green);
+            transition: height 0.2s linear;
+        }
+
+        .scroll-indicator .mono-label {
+            writing-mode: vertical-rl;
+            transform: rotate(180deg);
+            letter-spacing: 0.2em;
+        }
+
+        @media (max-width: 768px) {
+            .scroll-indicator { display: none; }
+        }
+
+        /* --- Utility & Layout --- */
+        section {
+            width: 100%;
+            padding: 10vw var(--gutter);
+            position: relative;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .line-mask {
+            overflow: hidden;
+            display: block;
+        }
+
+        .line-mask > * {
+            display: inline-block;
+            transform: translateY(110%);
+            transition: transform 1s var(--ease-cinematic);
+            will-change: transform;
+        }
+
+        .in-view .line-mask > *,
+        .in-view.line-mask > * {
+            transform: translateY(0);
+        }
+
+        .stagger-1 { transition-delay: 0.1s !important; }
+        .stagger-2 { transition-delay: 0.2s !important; }
+        .stagger-3 { transition-delay: 0.3s !important; }
+        .stagger-4 { transition-delay: 0.4s !important; }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            color: var(--text-primary);
+            border: 1px solid var(--text-secondary);
+            padding: 1rem 2rem;
+            border-radius: 40px;
+            transition: all 0.4s var(--ease-snappy);
+            background: transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn:hover {
+            border-color: var(--accent-green);
+            color: var(--bg-color);
+            background: var(--accent-green);
+        }
+
+        /* --- Section 01: Hero --- */
+        .hero {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            padding-top: var(--nav-height);
+            position: relative;
+        }
+
+        .hero-layout {
+            display: grid;
+            grid-template-columns: 6fr 4fr;
+            width: 100%;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .hero-meta {
+            position: absolute;
+            top: var(--nav-height);
+            left: var(--gutter);
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+
+        .hero-title {
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-title .serif {
+            font-size: clamp(2rem, 6vw, 6rem);
+            color: var(--accent-silver);
+            display: block;
+            margin: -0.5rem 0 -0.5rem 5vw;
+        }
+
+        /* Observatory Instrument (CSS/SVG) */
+        .observatory-field {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1;
+            max-width: 500px;
+            margin: 0 auto;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transform-style: preserve-3d;
+        }
+
+        .obs-circle {
+            position: absolute;
+            border-radius: 50%;
+            border: 1px solid rgba(184, 189, 199, 0.15);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .obs-circle-1 { width: 100%; height: 100%; animation: spin 40s linear infinite; }
+        .obs-circle-2 { width: 75%; height: 75%; border-color: rgba(183, 255, 60, 0.2); animation: spinReverse 30s linear infinite; border-style: dashed; }
+        .obs-circle-3 { width: 50%; height: 50%; border-left-color: transparent; animation: spin 20s linear infinite; }
+        
+        .obs-center {
+            width: 4px;
+            height: 4px;
+            background: var(--accent-green);
+            border-radius: 50%;
+            box-shadow: 0 0 15px var(--accent-green);
+        }
+
+        .obs-crosshair {
+            position: absolute;
+            width: 100%;
+            height: 1px;
+            background: rgba(242, 240, 233, 0.1);
+        }
+        .obs-crosshair.vert {
+            width: 1px;
+            height: 100%;
+        }
+
+        .obs-data-point {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: var(--accent-silver);
+            border-radius: 50%;
+        }
+
+        .obs-text-ring {
+            position: absolute;
+            width: 110%;
+            height: 110%;
+            animation: spin 60s linear infinite;
+        }
+
+        @keyframes spin { 100% { transform: translate(-50%, -50%) rotate(360deg); } }
+        @keyframes spinReverse { 100% { transform: translate(-50%, -50%) rotate(-360deg); } }
+
+        .hero-scroll-prompt {
+            position: absolute;
+            bottom: 40px;
+            left: var(--gutter);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .hero-scroll-line {
+            width: 1px;
+            height: 40px;
+            background: rgba(242, 240, 233, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        .hero-scroll-line::after {
+            content: '';
+            position: absolute;
+            top: -100%;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--accent-green);
+            animation: scrollLine 2s infinite ease-in-out;
+        }
+
+        @keyframes scrollLine {
+            0% { top: -100%; }
+            50% { top: 100%; }
+            100% { top: 100%; }
+        }
+
+        @media (max-width: 900px) {
+            .hero-layout { grid-template-columns: 1fr; }
+            .hero-title .serif { margin-left: 0; }
+            .observatory-field { margin-top: 4rem; opacity: 0.5; max-width: 300px;}
+        }
+
+        /* --- Section 02: Subject Profile --- */
+        .profile-section {
+            border-top: 1px solid var(--bg-tertiary);
+        }
+
+        .profile-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: clamp(4rem, 8vw, 8rem);
+            align-items: center;
+        }
+
+        .profile-img-container {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 4/5;
+            background: var(--bg-secondary);
+            overflow: hidden;
+        }
+
+        .profile-img-container img, .image-placeholder {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: grayscale(100%) contrast(1.1);
+            transition: transform 0.8s var(--ease-cinematic), filter 0.8s;
+        }
+
+        .image-placeholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            text-align: center;
+            padding: 1rem;
+        }
+
+        .profile-img-container:hover img, .profile-img-container:hover .image-placeholder {
+            transform: scale(1.05);
+            filter: grayscale(0%);
+        }
+
+        .obs-bracket {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border: 1px solid var(--accent-green);
+            z-index: 10;
+        }
+        .obs-bracket.tl { top: 10px; left: 10px; border-right: none; border-bottom: none; }
+        .obs-bracket.tr { top: 10px; right: 10px; border-left: none; border-bottom: none; }
+        .obs-bracket.bl { bottom: 10px; left: 10px; border-right: none; border-top: none; }
+        .obs-bracket.br { bottom: 10px; right: 10px; border-left: none; border-top: none; }
+
+        .img-scan-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: rgba(183, 255, 60, 0.4);
+            z-index: 5;
+            animation: imgScan 4s linear infinite;
+        }
+
+        .profile-img-container:hover .img-scan-line {
+            animation-duration: 2s;
+            background: rgba(183, 255, 60, 0.8);
+        }
+
+        @keyframes imgScan {
+            0% { top: 0; }
+            100% { top: 100%; }
+        }
+
+        .profile-labels {
+            position: absolute;
+            top: 0;
+            left: -30px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            writing-mode: vertical-rl;
+            transform: rotate(180deg);
+        }
+
+        .profile-content {
+            display: flex;
+            flex-direction: column;
+            gap: 3rem;
+        }
+
+        .data-points {
+            display: flex;
+            gap: 2rem;
+            border-top: 1px solid var(--bg-tertiary);
+            padding-top: 2rem;
+        }
+
+        .dp-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .dp-item span:first-child { color: var(--text-secondary); }
+        .dp-item span:last-child { color: var(--text-primary); font-family: var(--font-sans); }
+
+        @media (max-width: 900px) {
+            .profile-grid { grid-template-columns: 1fr; }
+            .profile-labels { display: none; }
+            .data-points { flex-direction: column; gap: 1rem; }
+        }
+
+        /* --- Section 03: Engineering Signal (Skills) --- */
+        .skills-section {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .signal-map-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            aspect-ratio: 1;
+            margin: 4rem auto 0;
+            border-radius: 50%;
+            border: 1px solid var(--bg-tertiary);
+        }
+
+        .signal-node {
+            position: absolute;
+            transform: translate(-50%, -50%);
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            background: var(--bg-secondary);
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(242, 240, 233, 0.1);
+            border-radius: 20px;
+            cursor: none;
+            transition: all 0.4s var(--ease-snappy);
+            z-index: 10;
+        }
+
+        .signal-node:hover {
+            border-color: var(--accent-green);
+            color: var(--accent-green);
+            box-shadow: 0 0 20px rgba(183, 255, 60, 0.2);
+            z-index: 20;
+        }
+
+        /* Node positions using % for responsiveness within the circle */
+        .node-center { top: 50%; left: 50%; font-size: 1rem; border-color: var(--accent-silver); }
+        .node-1 { top: 15%; left: 30%; }
+        .node-2 { top: 20%; left: 70%; }
+        .node-3 { top: 50%; left: 10%; }
+        .node-4 { top: 50%; left: 90%; }
+        .node-5 { top: 80%; left: 25%; }
+        .node-6 { top: 75%; left: 75%; }
+        .node-7 { top: 35%; left: 15%; }
+        .node-8 { top: 35%; left: 85%; }
+        .node-9 { top: 65%; left: 15%; }
+        .node-10 { top: 65%; left: 85%; }
+
+        .signal-lines {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .signal-lines line {
+            stroke: rgba(242, 240, 233, 0.05);
+            stroke-width: 1;
+            transition: stroke 0.4s;
+        }
+
+        .signal-map-container.hovering .signal-node:not(:hover) {
+            opacity: 0.3;
+        }
+
+        /* Mobile fallback */
+        .signal-list-mobile {
+            display: none;
+            flex-direction: column;
+            gap: 1rem;
+            margin-top: 3rem;
+        }
+
+        .signal-item-mob {
+            border: 1px solid var(--bg-tertiary);
+            padding: 1.5rem;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        @media (max-width: 900px) {
+            .signal-map-container { display: none; }
+            .signal-list-mobile { display: flex; }
+        }
+
+        /* --- Section 04: Selected Systems (Projects) --- */
+        .projects-section {
+            padding-top: 5rem;
+        }
+
+        .project-row {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: clamp(2rem, 5vw, 6rem);
+            margin-bottom: clamp(6rem, 15vh, 15rem);
+            align-items: center;
+        }
+
+        .project-img-wrapper {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16/10;
+            overflow: hidden;
+            background: var(--bg-tertiary);
+        }
+
+        .project-img-mask {
+            position: absolute;
+            inset: 0;
+            background: var(--bg-color);
+            z-index: 2;
+            transform-origin: top;
+            transition: transform 1.2s var(--ease-cinematic);
+        }
+
+        .in-view .project-img-mask {
+            transform: scaleY(0);
+        }
+
+        .project-img-wrapper img, .project-img-wrapper .image-placeholder {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 1.5s var(--ease-cinematic);
+        }
+
+        .project-img-wrapper:hover img, .project-img-wrapper:hover .image-placeholder {
+            transform: scale(1.03);
+        }
+
+        .project-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .project-meta-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            border-top: 1px solid var(--bg-tertiary);
+            border-bottom: 1px solid var(--bg-tertiary);
+            padding: 1.5rem 0;
+        }
+
+        .project-btns {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        @media (max-width: 900px) {
+            .project-row { grid-template-columns: 1fr; gap: 2rem; margin-bottom: 6rem; }
+            .project-btns .btn { width: 100%; justify-content: center; }
+        }
+
+        /* --- Section 05: Operating History --- */
+        .history-container {
+            position: relative;
+            max-width: 800px;
+            margin: 4rem auto 0;
+            padding-left: 40px;
+        }
+
+        .history-line {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 1px;
+            background: rgba(183, 255, 60, 0.2);
+        }
+
+        .history-progress {
+            position: absolute;
+            left: -3px;
+            top: 0;
+            width: 7px;
+            height: 7px;
+            background: var(--accent-green);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--accent-green);
+            transition: top 0.1s linear;
+        }
+
+        .history-item {
+            margin-bottom: 6rem;
+            opacity: 0.35;
+            transition: opacity 0.8s var(--ease-cinematic);
+            position: relative;
+        }
+
+        .history-item.active {
+            opacity: 1;
+        }
+
+        .history-item::before {
+            content: '';
+            position: absolute;
+            left: -44px; /* matches padding + line offset */
+            top: 10px;
+            width: 9px;
+            height: 9px;
+            border: 1px solid var(--bg-color);
+            background: var(--bg-secondary);
+            border-radius: 50%;
+            z-index: 2;
+        }
+
+        .history-header {
+            display: flex;
+            align-items:baseline;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        /* --- Section 06: Problem Solving (Stats) --- */
+        .stats-section {
+            background-color: var(--accent-green);
+            color: var(--bg-color);
+            padding: clamp(4rem, 10vw, 8rem) var(--gutter);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            text-align: center;
+            gap: 2rem;
+        }
+
+        .stat-number {
+            font-size: clamp(6rem, 20vw, 25rem);
+            line-height: 0.8;
+            font-weight: 700;
+            letter-spacing: -0.05em;
+            margin: 0;
+        }
+
+        .stats-meta {
+            display: flex;
+            justify-content: space-between;
+            border-top: 1px solid rgba(7, 7, 7, 0.2);
+            padding-top: 2rem;
+            font-family: var(--font-mono);
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        @media (max-width: 600px) {
+            .stats-meta { flex-direction: column; gap: 1rem; text-align: center; }
+        }
+
+        /* --- Section 07: Certificate Archive --- */
+        .archive-list {
+            margin-top: 4rem;
+            border-top: 1px solid var(--bg-tertiary);
+        }
+
+        .archive-item {
+            display: grid;
+            grid-template-columns: 100px 1.5fr 2fr;
+            align-items: center;
+            padding: 2rem 0;
+            border-bottom: 1px solid var(--bg-tertiary);
+            transition: background 0.4s;
+            position: relative;
+        }
+
+        .archive-item:hover {
+            background: rgba(255,255,255,0.02);
+            border-color: var(--accent-green);
+        }
+
+        .cert-img-wrapper {
+            height: 80px;
+            background: var(--bg-secondary);
+            position: relative;
+            overflow: hidden;
+            width: 140px;
+        }
+
+        .cert-img-wrapper .image-placeholder {
+            font-size: 0.5rem;
+            line-height: 1.2;
+            filter: grayscale(100%);
+            transition: filter 0.4s, transform 0.4s;
+        }
+
+        .archive-item:hover .cert-img-wrapper .image-placeholder {
+            filter: grayscale(0%);
+            transform: scale(1.05);
+        }
+
+        .cert-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-left: 2rem;
+        }
+
+        .cert-meta { display: flex; flex-direction: column; gap: 0.2rem;}
+
+        @media (max-width: 900px) {
+            .archive-item {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+                padding: 1.5rem 0;
+            }
+            .cert-details { padding-left: 0; flex-direction: column; align-items: flex-start; gap: 1rem;}
+            .cert-img-wrapper { width: 100%; height: 120px; }
+        }
+
+        /* --- Section 08: Principles --- */
+        .principles-section {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .principle-list {
+            margin-top: 6rem;
+            display: flex;
+            flex-direction: column;
+            gap: 4rem;
+        }
+
+        .principle-item {
+            display: grid;
+            grid-template-columns: 100px 1fr;
+            align-items: baseline;
+        }
+
+        .p-num {
+            font-family: var(--font-mono);
+            color: var(--accent-silver);
+            font-size: 1.5rem;
+        }
+
+        .p-text {
+            font-size: clamp(2rem, 5vw, 4rem);
+            text-transform: uppercase;
+            font-weight: 500;
+            color: var(--text-secondary);
+            transition: color 0.5s;
+        }
+
+        .in-view .p-text, .principle-item:hover .p-text {
+            color: var(--text-primary);
+        }
+
+        @media (max-width: 768px) {
+            .principle-item { grid-template-columns: 1fr; gap: 0.5rem; }
+        }
+
+        /* --- Section 09: Contact --- */
+        .contact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            margin-top: 4rem;
+        }
+
+        .contact-group {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .contact-links {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .contact-links a {
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--bg-tertiary);
+            padding-bottom: 1rem;
+            transition: border-color 0.4s, color 0.4s;
+        }
+
+        .contact-links a:hover {
+            border-color: var(--accent-green);
+            color: var(--accent-green);
+        }
+
+        /* Form */
+        .tx-form {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .input-group {
+            position: relative;
+        }
+
+        .input-group input, .input-group textarea {
+            width: 100%;
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid rgba(242, 240, 233, 0.3);
+            color: var(--text-primary);
+            font-family: var(--font-sans);
+            font-size: 1rem;
+            padding: 1rem 0;
+            outline: none;
+            transition: border-color 0.4s;
+            resize: none;
+        }
+
+        .input-group label {
+            position: absolute;
+            left: 0;
+            top: 1rem;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            transition: top 0.3s, font-size 0.3s, color 0.3s;
+            pointer-events: none;
+        }
+
+        .input-group input:focus, .input-group textarea:focus {
+            border-color: var(--accent-green);
+        }
+
+        .input-group input:focus + label,
+        .input-group textarea:focus + label,
+        .input-group input:not(:placeholder-shown) + label,
+        .input-group textarea:not(:placeholder-shown) + label {
+            top: -10px;
+            font-size: 0.6rem;
+            color: var(--accent-green);
+        }
+
+        @media (max-width: 900px) {
+            .contact-grid { grid-template-columns: 1fr; }
+        }
+
+        /* --- Footer --- */
+        .footer {
+            border-top: 1px solid var(--bg-tertiary);
+            padding: 4rem var(--gutter) 2rem;
+            background: var(--bg-secondary);
+        }
+
+        .footer-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 4rem;
+            border-bottom: 1px solid var(--bg-tertiary);
+            flex-wrap: wrap;
+            gap: 2rem;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            border: 1px solid rgba(183, 255, 60, 0.3);
+            padding: 0.5rem 1rem;
+            border-radius: 40px;
+            color: var(--accent-green);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--accent-green);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(183, 255, 60, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(183, 255, 60, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(183, 255, 60, 0); }
+        }
+
+        .footer-links {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            padding: 4rem 0;
+        }
+
+        .f-col h4 {
+            font-family: var(--font-mono);
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            font-size: 0.8rem;
+        }
+
+        .f-col ul { display: flex; flex-direction: column; gap: 0.5rem; }
+        .f-col a {
+            transition: color 0.3s;
+            display: inline-block;
+        }
+        .f-col a:hover {
+            color: var(--accent-green);
+            transform: translateX(10px);
+        }
+
+        .footer-bottom {
+            display: flex;
+            justify-content: space-between;
+            padding-top: 2rem;
+            border-top: 1px solid var(--bg-tertiary);
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .footer-links { grid-template-columns: 1fr; gap: 2rem; }
+            .footer-top { flex-direction: column; align-items: flex-start; }
+        }
+    </style>
+</head>
+<body class="loading">
+
+    <!-- Noise & Lighting -->
+    <div class="noise-overlay"></div>
+    <div class="radial-light" id="radialLight"></div>
+
+    <!-- Loader -->
+    <div class="loader" id="loader">
+        <div class="loader-content">
+            <div class="mono-label">OBSERVATORY / KG-27</div>
+            <div class="mono-label">CALIBRATING SYSTEM</div>
+            <div class="scan-line-container">
+                <div class="scan-line"></div>
+            </div>
+            <div class="loader-text mono-label green-text">
+                <span id="loaderState">READING SYSTEMS</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Cursor -->
+    <div class="cursor-dot"></div>
+    <div class="cursor-ring" data-text="OBSERVE"></div>
+
+    <!-- Fixed Scroll Indicator -->
+    <div class="scroll-indicator">
+        <div class="mono-label">OBSERVATION</div>
+        <div class="scroll-line">
+            <div class="scroll-progress" id="scrollProgress"></div>
+        </div>
+        <div class="mono-label indicator-num" id="indicatorNum">01 / 09</div>
+    </div>
+
+    <main>
+        <!-- 01: HERO -->
+        <section class="hero" id="s1" data-section="1">
+            <div class="hero-meta">
+                <span class="mono-label">SUBJECT / KRISH GOYAL</span>
+                <span class="mono-label">INDIA / 2026</span>
+                <span class="mono-label">STATUS / BUILDING</span>
+            </div>
+            
+            <div class="container hero-layout">
+                <div class="hero-title">
+                    <h1 class="massive-text line-mask"><span class="stagger-1">I ENGINEER</span></h1>
+                    <h1 class="massive-text line-mask"><span class="serif italic stagger-2">systems that</span></h1>
+                    <h1 class="massive-text line-mask"><span class="stagger-3">SURVIVE</span></h1>
+                    <h1 class="massive-text line-mask"><span class="stagger-4">REALITY.</span></h1>
+                </div>
+                
+                <div class="observatory-field" data-cursor="OBSERVE">
+                    <div class="obs-circle obs-circle-1"></div>
+                    <div class="obs-circle obs-circle-2"></div>
+                    <div class="obs-circle obs-circle-3"></div>
+                    <div class="obs-crosshair"></div>
+                    <div class="obs-crosshair vert"></div>
+                    <div class="obs-center"></div>
+                    
+                    <!-- Decorative data points -->
+                    <div class="obs-data-point" style="top: 10%; left: 30%;"></div>
+                    <div class="obs-data-point" style="bottom: 20%; right: 25%;"></div>
+                    
+                    <!-- SVG Text rotating -->
+                    <div class="obs-text-ring">
+                        <svg viewBox="0 0 100 100" width="100%" height="100%">
+                            <defs>
+                                <path id="circlePath" d="M 50, 50 m -45, 0 a 45,45 0 1,1 90,0 a 45,45 0 1,1 -90,0" />
+                            </defs>
+                            <text font-family="'JetBrains Mono', monospace" font-size="6" fill="#88888F" letter-spacing="0.2em">
+                                <textPath href="#circlePath" startOffset="0%">
+                                    KRISH GOYAL // AI & ML ENGINEER // KRISH GOYAL // AI & ML ENGINEER //
+                                </textPath>
+                            </text>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hero-scroll-prompt">
+                <div class="hero-scroll-line"></div>
+                <span class="mono-label">SCROLL TO BEGIN OBSERVATION</span>
+            </div>
+        </section>
+
+        <!-- 02: PROFILE -->
+        <section class="profile-section observe-me" id="s2" data-section="2">
+            <div class="container profile-grid">
+                
+                <div class="profile-img-col" data-cursor="IDENTIFY">
+                    <div class="profile-img-container">
+                        <div class="obs-bracket tl"></div>
+                        <div class="obs-bracket tr"></div>
+                        <div class="obs-bracket bl"></div>
+                        <div class="obs-bracket br"></div>
+                        <div class="img-scan-line"></div>
+                        <div class="profile-labels">
+                            <span class="mono-label">SUBJECT / KG</span>
+                            <span class="mono-label">AGE / —</span>
+                            <span class="mono-label">ROLE / ENGINEER</span>
+                            <span class="mono-label">LOCATION / INDIA</span>
+                        </div>
+                        <div class="image-placeholder">KRISH_PROFILE_IMAGE<br>[PLACEHOLDER]</div>
+                    </div>
+                </div>
+
+                <div class="profile-content">
+                    <div>
+                        <span class="mono-label">SUBJECT PROFILE / 01</span>
+                        <h2 class="line-mask" style="margin-top: 1rem;">
+                            <span class="stagger-1">I DON'T JUST</span><br>
+                            <span class="stagger-2">BUILD PAGES.</span><br>
+                            <span class="stagger-3">I BUILD <span class="serif italic">SYSTEMS.</span></span>
+                        </h2>
+                    </div>
+                    
+                    <p class="line-mask"><span class="stagger-1">I'm Krish Goyal, a AI & ML Engineer focused on transforming complex engineering problems into reliable, production-ready digital systems.</span></p>
+                    
+                    <p class="line-mask"><span class="stagger-2">My expertise spans building resilient interfaces, structuring robust backend architecture, designing scalable APIs, handling secure authentication, and orchestrating databases for high-performance deployment.</span></p>
+
+                    <div class="data-points">
+                        <div class="dp-item">
+                            <span class="mono-label">ROLE</span>
+                            <span>AI & ML ENGINEER</span>
+                        </div>
+                        <div class="dp-item">
+                            <span class="mono-label">FOCUS</span>
+                            <span>SCALABLE WEB SYSTEMS</span>
+                        </div>
+                        <div class="dp-item">
+                            <span class="mono-label">BASE</span>
+                            <span>INDIA</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <a href="#" class="btn" data-cursor="OPEN ↗">DOWNLOAD RESUME ↘</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 03: SIGNAL MAP -->
+        <section class="skills-section observe-me" id="s3" data-section="3">
+            <div class="container">
+                <span class="mono-label">ENGINEERING STACK / 02</span>
+                <h2 class="line-mask"><span class="stagger-1">MY ENGINEERING</span><br><span class="stagger-2">SIGNAL.</span></h2>
+
+                <!-- Desktop Map -->
+                <div class="signal-map-container" id="signalMap">
+                    <!-- SVG Lines -->
+                    <svg class="signal-lines" id="signalLines">
+                        <!-- Lines will be injected by JS for precise coordination, or drawn manually -->
+                        <line x1="50%" y1="50%" x2="30%" y2="15%" data-conn="node-1"></line>
+                        <line x1="50%" y1="50%" x2="70%" y2="20%" data-conn="node-2"></line>
+                        <line x1="50%" y1="50%" x2="10%" y2="50%" data-conn="node-3"></line>
+                        <line x1="50%" y1="50%" x2="90%" y2="50%" data-conn="node-4"></line>
+                        <line x1="50%" y1="50%" x2="25%" y2="80%" data-conn="node-5"></line>
+                        <line x1="50%" y1="50%" x2="75%" y2="75%" data-conn="node-6"></line>
+                        
+                        <!-- Inter-node connections -->
+                        <line x1="10%" y1="50%" x2="30%" y2="15%" data-conn="node-3 node-1"></line> <!-- React to JS -->
+                        <line x1="90%" y1="50%" x2="75%" y2="75%" data-conn="node-4 node-6"></line> <!-- Node to Express -->
+                        <line x1="75%" y1="75%" x2="85%" y2="65%" data-conn="node-6 node-10"></line> <!-- Express to Mongo -->
+                        <line x1="25%" y1="80%" x2="15%" y2="65%" data-conn="node-5 node-9"></line> <!-- Java to DSA -->
+                    </svg>
+
+                    <!-- Nodes -->
+                    <div class="signal-node node-center" data-id="center">SYSTEM CORE</div>
+                    <div class="signal-node node-1" data-id="node-1" data-cursor="OBSERVE" data-desc="Client Logic">JAVASCRIPT</div>
+                    <div class="signal-node node-2" data-id="node-2" data-cursor="OBSERVE" data-desc="System Scripts">PYTHON</div>
+                    <div class="signal-node node-3" data-id="node-3" data-cursor="OBSERVE" data-desc="UI Architecture">REACT</div>
+                    <div class="signal-node node-4" data-id="node-4" data-cursor="OBSERVE" data-desc="Server Runtime">NODE.JS</div>
+                    <div class="signal-node node-5" data-id="node-5" data-cursor="OBSERVE" data-desc="Object Oriented">JAVA</div>
+                    <div class="signal-node node-6" data-id="node-6" data-cursor="OBSERVE" data-desc="API Framework">EXPRESS</div>
+                    <div class="signal-node node-7" data-id="node-7" data-cursor="OBSERVE" data-desc="Markup">HTML/CSS</div>
+                    <div class="signal-node node-8" data-id="node-8" data-cursor="OBSERVE" data-desc="Version Control">GIT</div>
+                    <div class="signal-node node-9" data-id="node-9" data-cursor="OBSERVE" data-desc="Problem Solving">DSA</div>
+                    <div class="signal-node node-10" data-id="node-10" data-cursor="OBSERVE" data-desc="NoSQL Database">MONGODB</div>
+                </div>
+
+                <!-- Mobile List -->
+                <div class="signal-list-mobile">
+                    <div class="signal-item-mob"><span>JAVASCRIPT / REACT</span><span class="mono-label green-text">FRONTEND</span></div>
+                    <div class="signal-item-mob"><span>NODE.JS / EXPRESS</span><span class="mono-label green-text">BACKEND</span></div>
+                    <div class="signal-item-mob"><span>MONGODB / MYSQL</span><span class="mono-label green-text">DATABASE</span></div>
+                    <div class="signal-item-mob"><span>JAVA / PYTHON</span><span class="mono-label green-text">LOGIC</span></div>
+                    <div class="signal-item-mob"><span>GIT / GITHUB</span><span class="mono-label green-text">VCS</span></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 04: PROJECTS -->
+        <section class="projects-section" id="s4" data-section="4">
+            <div class="container">
+                <span class="mono-label">SELECTED SYSTEMS / 03</span>
+                
+                <div class="project-list" style="margin-top: 4rem;">
+                    
+                    <!-- Project 1 -->
+                    <div class="project-row observe-me">
+                        <div class="project-img-wrapper" data-cursor="VIEW SYSTEM">
+                            <div class="project-img-mask"></div>
+                            <div class="image-placeholder">CODETEXA_PROJECT_IMAGE<br>[PLACEHOLDER]</div>
+                        </div>
+                        <div class="project-info">
+                            <span class="mono-label">SYSTEM / 01</span>
+                            <h3>CodeTexa LMS</h3>
+                            <p>Learning Management System with role-specific dashboards, secure authentication, and cloud media handling built for scale.</p>
+                            
+                            <div class="project-meta-grid">
+                                <div class="dp-item">
+                                    <span class="mono-label">SYSTEM TYPE</span>
+                                    <span style="font-size: 0.9rem;">PRODUCTION WEB APP</span>
+                                </div>
+                                <div class="dp-item">
+                                    <span class="mono-label">STATUS</span>
+                                    <span style="font-size: 0.9rem;" class="green-text">SHIPPED</span>
+                                </div>
+                                <div class="dp-item">
+                                    <span class="mono-label">STACK</span>
+                                    <span style="font-size: 0.9rem;">MERN STACK</span>
+                                </div>
+                            </div>
+                            
+                            <div class="project-btns">
+                                <a href="javascript:void(0)" onclick="notifyPlaceholder()" class="btn" data-cursor="OPEN ↗">OBSERVE LIVE ↗</a>
+                                <a href="javascript:void(0)" onclick="notifyPlaceholder()" class="btn" data-cursor="OPEN ↗">SOURCE CODE ↗</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Project 2 -->
+                    <div class="project-row observe-me">
+                        <div class="project-img-wrapper" data-cursor="VIEW SYSTEM">
+                            <div class="project-img-mask"></div>
+                            <div class="image-placeholder">DSPL_PROJECT_IMAGE<br>[PLACEHOLDER]</div>
+                        </div>
+                        <div class="project-info">
+                            <span class="mono-label">SYSTEM / 02</span>
+                            <h3>DSPL Technology</h3>
+                            <p>Creative technology agency website focused on premium digital experiences, optimized performance and structured content architecture.</p>
+                            
+                            <div class="project-meta-grid">
+                                <div class="dp-item">
+                                    <span class="mono-label">SYSTEM TYPE</span>
+                                    <span style="font-size: 0.9rem;">CORPORATE PLATFORM</span>
+                                </div>
+                                <div class="dp-item">
+                                    <span class="mono-label">STATUS</span>
+                                    <span style="font-size: 0.9rem;" class="green-text">SHIPPED</span>
+                                </div>
+                                <div class="dp-item">
+                                    <span class="mono-label">STACK</span>
+                                    <span style="font-size: 0.9rem;">MERN STACK</span>
+                                </div>
+                            </div>
+                            
+                            <div class="project-btns">
+                                <a href="javascript:void(0)" onclick="notifyPlaceholder()" class="btn" data-cursor="OPEN ↗">OBSERVE LIVE ↗</a>
+                                <a href="javascript:void(0)" onclick="notifyPlaceholder()" class="btn" data-cursor="OPEN ↗">SOURCE CODE ↗</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Project 3 -->
+                    <div class="project-row observe-me">
+                        <div class="project-img-wrapper" data-cursor="VIEW SYSTEM">
+                            <div class="project-img-mask"></div>
+                            <div class="image-placeholder">AYODHYA_PROJECT_IMAGE<br>[PLACEHOLDER]</div>
+                        </div>
+                        <div class="project-info">
+                            <span class="mono-label">SYSTEM / 03</span>
+                            <h3>Ayodhya Estates</h3>
+                            <p>Real estate platform featuring dynamic property listings, advanced search filters, and virtual tour integration capabilities.</p>
+                            
+                            <div class="project-meta-grid">
+                                <div class="dp-item">
+                                    <span class="mono-label">SYSTEM TYPE</span>
+                                    <span style="font-size: 0.9rem;">LISTING PLATFORM</span>
+                                </div>
+                                <div class="dp-item">
+                                    <span class="mono-label">STATUS</span>
+                                    <span style="font-size: 0.9rem;" class="green-text">SHIPPED</span>
+                                </div>
+                                <div class="dp-item">
+                                    <span class="mono-label">STACK</span>
+                                    <span style="font-size: 0.9rem;">FULL STACK</span>
+                                </div>
+                            </div>
+                            
+                            <div class="project-btns">
+                                <a href="javascript:void(0)" onclick="notifyPlaceholder()" class="btn" data-cursor="OPEN ↗">OBSERVE LIVE ↗</a>
+                                <a href="javascript:void(0)" onclick="notifyPlaceholder()" class="btn" data-cursor="OPEN ↗">SOURCE CODE ↗</a>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- 05: EXPERIENCE TIMELINE -->
+        <section class="experience-section observe-me" id="s5" data-section="5">
+            <div class="container">
+                <span class="mono-label">OPERATING HISTORY / 04</span>
+                <h2 class="line-mask"><span class="stagger-1">SYSTEMS ARE BUILT</span><br><span class="stagger-2">THROUGH EXPERIENCE.</span></h2>
+                
+                <div class="history-container">
+                    <div class="history-line"></div>
+                    <div class="history-progress" id="histProgress"></div>
+
+                    <div class="history-item hist-target">
+                        <div class="history-header">
+                            <h3 class="green-text">2026</h3>
+                            <span class="mono-label">FREELANCE FULL STACK DEVELOPER</span>
+                        </div>
+                        <h4 style="font-size: 1.5rem; margin-bottom: 1rem;">Code Teza LMS</h4>
+                        <p>Built and delivered a full-scale Learning Management System on the MERN stack, handling architecture, module planning, development, testing and production deployment.</p>
+                    </div>
+
+                    <div class="history-item hist-target">
+                        <div class="history-header">
+                            <h3 class="green-text">2025</h3>
+                            <span class="mono-label">FULL STACK DEVELOPER INTERN</span>
+                        </div>
+                        <h4 style="font-size: 1.5rem; margin-bottom: 1rem;">DSPL Technologies</h4>
+                        <p>Worked on modernizing the company website into a structured MERN-based platform and improved frontend stability, responsive behavior and production quality.</p>
+                    </div>
+
+                    <div class="history-item hist-target">
+                        <div class="history-header">
+                            <h3 class="green-text">2023 - 2027</h3>
+                            <span class="mono-label">B.TECH COMPUTER SCIENCE</span>
+                        </div>
+                        <h4 style="font-size: 1.5rem; margin-bottom: 1rem;">Lovely Professional University</h4>
+                        <p>Pursuing comprehensive computer science education. Focusing on data structures, algorithms, system design, and software engineering methodologies.</p>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- 06: STATS -->
+        <section class="stats-section observe-me" id="s6" data-section="6">
+            <div class="container stats-grid">
+                <h2 style="color: var(--bg-color); font-size: clamp(2rem, 5vw, 4rem);">PROBLEMS SOLVED.</h2>
+                <div class="stat-number">0+</div>
+                
+                <div class="stats-meta" style="color: var(--bg-color);">
+                    <span>LEETCODE</span>
+                    <span>GEEKSFORGEEKS</span>
+                    <span>HACKERRANK</span>
+                </div>
+                
+                <div class="stats-meta" style="border: none; padding-top: 0; color: rgba(7,7,7,0.5);">
+                    <span>LOGIC</span>
+                    <span>CONSISTENCY</span>
+                    <span>OPTIMIZATION</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- 07: CERTIFICATES -->
+        <section class="cert-section observe-me" id="s7" data-section="7">
+            <div class="container">
+                <span class="mono-label">ARCHIVE / 05</span>
+                <h2 class="line-mask"><span class="stagger-1">VERIFIED</span><br><span class="stagger-2">KNOWLEDGE.</span></h2>
+                
+                <div class="archive-list">
+                    <a href="javascript:void(0)" onclick="notifyPlaceholder()" class="archive-item" data-cursor="OPEN ↗">
+                        <div class="mono-label">REC / 01</div>
+                        <div class="cert-img-wrapper">
+                            <div class="image-placeholder">CERT_MYSQL<br>[IMG]</div>
+                        </div>
+                        <div class="cert-details">
+                            <div class="cert-meta">
+                                <h3>Database Structures with MySQL</h3>
+                                <span class="mono-label">META / COURSERA</span>
+                            </div>
+                            <span class="mono-label green-text">VERIFY RECORD ↗</span>
+                        </div>
+                    </a>
+
+                    <a href="javascript:void(0)" onclick="notifyPlaceholder()" class="archive-item" data-cursor="OPEN ↗">
+                        <div class="mono-label">REC / 02</div>
+                        <div class="cert-img-wrapper">
+                            <div class="image-placeholder">CERT_WEB<br>[IMG]</div>
+                        </div>
+                        <div class="cert-details">
+                            <div class="cert-meta">
+                                <h3>Responsive Web Design</h3>
+                                <span class="mono-label">FREECODECAMP</span>
+                            </div>
+                            <span class="mono-label green-text">VERIFY RECORD ↗</span>
+                        </div>
+                    </a>
+
+                    <a href="javascript:void(0)" onclick="notifyPlaceholder()" class="archive-item" data-cursor="OPEN ↗">
+                        <div class="mono-label">REC / 03</div>
+                        <div class="cert-img-wrapper">
+                            <div class="image-placeholder">CERT_DSA<br>[IMG]</div>
+                        </div>
+                        <div class="cert-details">
+                            <div class="cert-meta">
+                                <h3>Data Structures and Algorithm</h3>
+                                <span class="mono-label">LPU / IAMNEO</span>
+                            </div>
+                            <span class="mono-label green-text">VERIFY RECORD ↗</span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- 08: PRINCIPLES -->
+        <section class="principles-section observe-me" id="s8" data-section="8">
+            <div class="container">
+                <h2 class="line-mask" style="font-size: clamp(3rem, 7vw, 7rem);">
+                    <span class="stagger-1">GOOD SOFTWARE</span><br>
+                    <span class="stagger-2">IS <span class="serif italic">QUIET.</span></span>
+                </h2>
+                <div class="mono-label line-mask" style="margin-top: 2rem;">
+                    <span class="stagger-3">IT WORKS. IT SCALES. IT SURVIVES CHANGE.</span>
+                </div>
+
+                <div class="principle-list">
+                    <div class="principle-item observe-me" data-cursor="OBSERVE">
+                        <span class="p-num">01</span>
+                        <div class="p-text line-mask"><span class="stagger-1">CLARITY OVER COMPLEXITY</span></div>
+                    </div>
+                    <div class="principle-item observe-me" data-cursor="OBSERVE">
+                        <span class="p-num">02</span>
+                        <div class="p-text line-mask"><span class="stagger-2">SYSTEMS BEFORE FEATURES</span></div>
+                    </div>
+                    <div class="principle-item observe-me" data-cursor="OBSERVE">
+                        <span class="p-num">03</span>
+                        <div class="p-text line-mask"><span class="stagger-1">PERFORMANCE IS EXPERIENCE</span></div>
+                    </div>
+                    <div class="principle-item observe-me" data-cursor="OBSERVE">
+                        <span class="p-num">04</span>
+                        <div class="p-text line-mask"><span class="stagger-2">SHIP. OBSERVE. IMPROVE.</span></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 09: CONTACT -->
+        <section class="contact-section observe-me" id="s9" data-section="9">
+            <div class="container">
+                <h2 class="massive-text line-mask">
+                    <span class="stagger-1">HAVE A SYSTEM</span><br>
+                    <span class="stagger-2">TO BUILD?</span>
+                </h2>
+                <h3 class="serif italic" style="margin: 2rem 0; color: var(--accent-silver);">open a channel.</h3>
+
+                <div class="contact-grid">
+                    <div class="contact-group">
+                        <span class="mono-label">DIRECT CHANNELS</span>
+                        <div class="contact-links">
+                            <a href="mailto:krishgoyal.dev@gmail.com" data-cursor="OPEN ↗">
+                                krishgoyal.dev@gmail.com <span class="mono-label">COPY EMAIL</span>
+                            </a>
+                            <a href="https://github.com" target="_blank" data-cursor="OPEN ↗">GITHUB ↗</a>
+                            <a href="https://linkedin.com" target="_blank" data-cursor="OPEN ↗">LINKEDIN ↗</a>
+                            <a href="https://instagram.com" target="_blank" data-cursor="OPEN ↗">INSTAGRAM ↗</a>
+                        </div>
+                        <div style="margin-top: 2rem;">
+                            <span class="mono-label">PHONE</span>
+                            <p style="color: var(--text-primary); font-size: 1.5rem; margin-top: 0.5rem;">+91-9876543210</p>
+                        </div>
+                    </div>
+
+                    <div class="contact-group">
+                        <span class="mono-label">TRANSMISSION FORM</span>
+                        <form class="tx-form" onsubmit="event.preventDefault(); notifyForm();">
+                            <div class="input-group">
+                                <input type="text" id="name" placeholder=" " required>
+                                <label for="name">NAME</label>
+                            </div>
+                            <div class="input-group">
+                                <input type="email" id="email" placeholder=" " required>
+                                <label for="email">EMAIL</label>
+                            </div>
+                            <div class="input-group">
+                                <input type="text" id="project" placeholder=" " required>
+                                <label for="project">PROJECT / OPPORTUNITY</label>
+                            </div>
+                            <div class="input-group">
+                                <textarea id="message" rows="4" placeholder=" " required></textarea>
+                                <label for="message">MESSAGE</label>
+                            </div>
+                            <button type="submit" class="btn" style="width: fit-content;" data-cursor="OBSERVE">TRANSMIT SIGNAL ↗</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-top">
+                <h2>KRISH<br>GOYAL</h2>
+                
+                <div style="text-align: center;">
+                    <span class="mono-label" style="display: block; margin-bottom: 0.5rem;">CURRENT STATUS</span>
+                    <div class="status-badge">
+                        <div class="status-dot"></div>
+                        AVAILABLE FOR OPPORTUNITIES
+                    </div>
+                </div>
+
+                <div style="text-align: right;">
+                    <span class="mono-label" style="display: block;">INDIA</span>
+                    <span class="mono-label" style="display: block;">2026</span>
+                </div>
+            </div>
+
+            <div class="footer-links">
+                <div class="f-col">
+                    <h4>DEV NETWORK</h4>
+                    <ul>
+                        <li><a href="#" data-cursor="OPEN ↗">GITHUB</a></li>
+                        <li><a href="#" data-cursor="OPEN ↗">LEETCODE</a></li>
+                        <li><a href="#" data-cursor="OPEN ↗">GEEKSFORGEEKS</a></li>
+                        <li><a href="#" data-cursor="OPEN ↗">HACKERRANK</a></li>
+                    </ul>
+                </div>
+                <div class="f-col">
+                    <h4>COMMUNICATION</h4>
+                    <ul>
+                        <li><a href="#" data-cursor="OPEN ↗">LINKEDIN</a></li>
+                        <li><a href="#" data-cursor="OPEN ↗">INSTAGRAM</a></li>
+                        <li><a href="#" data-cursor="OPEN ↗">FACEBOOK</a></li>
+                        <li><a href="mailto:krishgoyal.dev@gmail.com" data-cursor="OPEN ↗">EMAIL</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <span>© 2026 KRISH GOYAL</span>
+                <span class="green-text">SYSTEM / ONLINE</span>
+                <span>LOCAL TIME / <span id="liveTime">00:00:00 IST</span></span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Notification system for placeholders -->
+    <div id="notification" style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--accent-green); color: var(--bg-color); padding: 1rem 2rem; border-radius: 40px; font-family: var(--font-mono); font-size: 0.8rem; z-index: 10000; transition: transform 0.4s var(--ease-snappy); opacity: 0; pointer-events: none;">
+        PROJECT LINK / ADD URL
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        // --- 1. Loader Sequence ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const loader = document.getElementById('loader');
+            const loaderState = document.getElementById('loaderState');
+            const states = [
+                "READING SYSTEMS", 
+                "INDEXING PROJECTS", 
+                "MAPPING EXPERIENCE", 
+                "OBSERVER READY", 
+                "ENTERING / KRISH GOYAL"
+            ];
+            let step = 0;
+            
+            const loaderInterval = setInterval(() => {
+                step++;
+                if (step < states.length) {
+                    loaderState.innerText = states[step];
+                } else {
+                    clearInterval(loaderInterval);
+                    setTimeout(() => {
+                        loader.style.transform = 'scaleY(0)';
+                        document.body.classList.remove('loading');
+                        // Trigger initial animations
+                        document.querySelectorAll('.hero .line-mask').forEach(el => el.classList.add('in-view'));
+                    }, 500);
+                }
+            }, 450); // total ~2.2s
+        });
+
+        // --- 2. Custom Cursor ---
+        const cursorDot = document.querySelector('.cursor-dot');
+        const cursorRing = document.querySelector('.cursor-ring');
+        let mouseX = 0, mouseY = 0, ringX = 0, ringY = 0;
+        let isTouch = matchMedia('(hover: none), (pointer: coarse)').matches;
+
+        if (!isTouch) {
+            window.addEventListener('mousemove', (e) => {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+                cursorDot.style.transform = `translate(${mouseX}px, ${mouseY}px)`;
+                
+                // Subtle radial light follows cursor
+                const light = document.getElementById('radialLight');
+                light.style.background = `radial-gradient(circle at ${mouseX}px ${mouseY}px, rgba(183, 255, 60, 0.04) 0%, transparent 50%)`;
+            });
+
+            const renderCursor = () => {
+                ringX += (mouseX - ringX) * 0.15; // lerp
+                ringY += (mouseY - ringY) * 0.15;
+                cursorRing.style.transform = `translate(${ringX}px, ${ringY}px)`;
+                requestAnimationFrame(renderCursor);
+            };
+            requestAnimationFrame(renderCursor);
+
+            // Hover effects
+            const hoverElements = document.querySelectorAll('[data-cursor], a, button, input, textarea');
+            hoverElements.forEach(el => {
+                el.addEventListener('mouseenter', () => {
+                    document.body.classList.add('cursor-hover');
+                    if (el.dataset.cursor) {
+                        cursorRing.setAttribute('data-text', el.dataset.cursor);
+                    } else if (el.tagName === 'A' || el.tagName === 'BUTTON') {
+                        cursorRing.setAttribute('data-text', 'OPEN ↗');
+                    } else {
+                        cursorRing.setAttribute('data-text', 'INPUT');
+                    }
+                });
+                el.addEventListener('mouseleave', () => {
+                    document.body.classList.remove('cursor-hover');
+                    cursorRing.setAttribute('data-text', 'OBSERVE');
+                });
+            });
+        }
+
+        // --- 3. Intersection Observer (Scroll Reveals) ---
+        const revealOptions = { threshold: 0.1, rootMargin: "0px 0px -50px 0px" };
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('in-view');
+                    // observer.unobserve(entry.target); // Optional: unobserve after reveal
+                }
+            });
+        }, revealOptions);
+
+        document.querySelectorAll('.observe-me').forEach(el => observer.observe(el));
+
+        // --- 4. Scroll Indicator Update ---
+        const sections = document.querySelectorAll('section[data-section]');
+        const indicatorNum = document.getElementById('indicatorNum');
+        const scrollProgress = document.getElementById('scrollProgress');
+
+        window.addEventListener('scroll', () => {
+            let currentSec = 1;
+            let scrolled = window.scrollY;
+            let docHeight = document.body.offsetHeight - window.innerHeight;
+            
+            // Progress bar
+            if(docHeight > 0) {
+                let progress = (scrolled / docHeight) * 100;
+                scrollProgress.style.height = `${progress}%`;
+            }
+
+            // Section tracking
+            sections.forEach(sec => {
+                const secTop = sec.offsetTop - (window.innerHeight / 2);
+                if (scrolled >= secTop) {
+                    currentSec = sec.getAttribute('data-section');
+                }
+            });
+            indicatorNum.innerText = `0${currentSec} / 09`;
+        });
+
+        // --- 5. Signal Map (Skills) Interactions ---
+        const mapContainer = document.getElementById('signalMap');
+        const mapNodes = document.querySelectorAll('.signal-node:not(.node-center)');
+        const mapLines = document.querySelectorAll('.signal-lines line');
+
+        mapNodes.forEach(node => {
+            node.addEventListener('mouseenter', () => {
+                if(isTouch) return;
+                mapContainer.classList.add('hovering');
+                const nodeId = node.getAttribute('data-id');
+                
+                // Highlight connected lines
+                mapLines.forEach(line => {
+                    if (line.getAttribute('data-conn').includes(nodeId)) {
+                        line.style.stroke = 'rgba(183, 255, 60, 0.8)';
+                        line.style.strokeWidth = '2';
+                    } else {
+                        line.style.stroke = 'rgba(242, 240, 233, 0.05)';
+                        line.style.strokeWidth = '1';
+                    }
+                });
+            });
+
+            node.addEventListener('mouseleave', () => {
+                if(isTouch) return;
+                mapContainer.classList.remove('hovering');
+                mapLines.forEach(line => {
+                    line.style.stroke = 'rgba(242, 240, 233, 0.05)';
+                    line.style.strokeWidth = '1';
+                });
+            });
+        });
+
+        // --- 6. Stats Counter ---
+        let counted = false;
+        const statTarget = document.querySelector('.stats-section');
+        const statNumber = document.querySelector('.stat-number');
+        
+        const statObserver = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting && !counted) {
+                counted = true;
+                let count = 0;
+                const target = 200;
+                const duration = 2000;
+                const stepTime = Math.abs(Math.floor(duration / target));
+                
+                const timer = setInterval(() => {
+                    count += Math.floor(Math.random() * 5) + 1; // Random jump for glitchy effect
+                    if (count >= target) {
+                        count = target;
+                        clearInterval(timer);
+                    }
+                    statNumber.innerText = count + '+';
+                }, stepTime);
+            }
+        }, { threshold: 0.5 });
+        
+        statObserver.observe(statTarget);
+
+        // --- 7. Experience Timeline Tracking ---
+        const histSection = document.getElementById('s5');
+        const histProgress = document.getElementById('histProgress');
+        const histItems = document.querySelectorAll('.hist-target');
+
+        window.addEventListener('scroll', () => {
+            if(!histSection) return;
+            const secRect = histSection.getBoundingClientRect();
+            
+            // Only calculate if section is in viewport
+            if(secRect.top < window.innerHeight && secRect.bottom > 0) {
+                histItems.forEach((item, index) => {
+                    const rect = item.getBoundingClientRect();
+                    // If item is near center of viewport
+                    if(rect.top < window.innerHeight * 0.6 && rect.bottom > 0) {
+                        item.classList.add('active');
+                        // Move dot to this item
+                        histProgress.style.top = `${item.offsetTop + 15}px`;
+                    } else {
+                        item.classList.remove('active');
+                    }
+                });
+            }
+        });
+
+        // --- 8. Live Indian Time ---
+        const timeDisplay = document.getElementById('liveTime');
+        setInterval(() => {
+            const options = { timeZone: 'Asia/Kolkata', hour12: true, hour: '2-digit', minute:'2-digit', second:'2-digit' };
+            const timeStr = new Date().toLocaleTimeString('en-US', options);
+            timeDisplay.innerText = `${timeStr} IST`;
+        }, 1000);
+
+        // --- 9. Notifications ---
+        function notify(msg) {
+            const notif = document.getElementById('notification');
+            notif.innerText = msg;
+            notif.style.transform = 'translateX(-50%) translateY(0)';
+            notif.style.opacity = '1';
+            setTimeout(() => {
+                notif.style.transform = 'translateX(-50%) translateY(100px)';
+                notif.style.opacity = '0';
+            }, 3000);
+        }
+
+        window.notifyPlaceholder = () => notify('PROJECT LINK / ADD URL');
+        window.notifyForm = () => notify('SIGNAL TRANSMITTED SUCCESSFULLY.');
+
+    </script>
+</body>
+</html>
